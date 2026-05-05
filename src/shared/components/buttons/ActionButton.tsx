@@ -52,7 +52,7 @@ const variantStyles: Record<Variant, string> = {
 const sizeStyles: Record<Size, string> = {
   sm: 'px-3 py-2 text-sm',
   md: 'px-5 py-2 text-base',
-  lg: 'px-8 py-3 text-lg',
+  lg: 'px-8 py-5 text-lg',
 };
 
 export function ActionButton({
