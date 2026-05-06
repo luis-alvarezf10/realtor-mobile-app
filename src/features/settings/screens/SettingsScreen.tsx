@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
+import { supabase } from '../../../lib/supabase';
 
 type SettingsTab = 'perfil' | 'acerca' | 'ayuda';
 
@@ -107,9 +108,16 @@ export function SettingsScreen({ navigation }: any) {
         description="Tendrás que iniciar sesión nuevamente para acceder"
         confirmLabel="Cerrar sesión"
         cancelLabel="Cancelar"
-        onConfirm={() => {
+        onConfirm={async () => {
           setShowLogoutDialog(false);
-          navigation.navigate('Login');
+          try {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+              Alert.alert('Error', error.message);
+            }
+          } catch (error) {
+            Alert.alert('Error', 'No se pudo cerrar la sesión');
+          }
         }}
         onCancel={() => setShowLogoutDialog(false)}
       />

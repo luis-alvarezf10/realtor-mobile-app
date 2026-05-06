@@ -5,10 +5,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, TouchableOpacity, StyleSheet, Animated as RNAnimated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated as RNAnimated, ActivityIndicator } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from './src/lib/supabase';
 
 // Screens - Auth
 import { LoginScreen } from './src/features/auth/screens/LoginScreen';
@@ -142,19 +143,83 @@ function MainTabs() {
   );
 }
 
+function AppNavigator() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: stakeholder } = await supabase
+          .from('stakeholders')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        setIsAuthenticated(stakeholder?.role === 'realtor');
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: stakeholder } = await supabase
+          .from('stakeholders')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        setIsAuthenticated(stakeholder?.role === 'realtor');
+      }
+    } catch (error) {
+      console.error('Error checking user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#cc2d19" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+      <StatusBar style="auto" />
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Notifications" component={NotificationsScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
+      <AppNavigator />
     </SafeAreaProvider>
   );
 }
