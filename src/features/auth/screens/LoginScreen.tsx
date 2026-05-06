@@ -1,8 +1,12 @@
-import { View, Text, TextInput } from 'react-native';
-import { Link } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ActionButton } from '../../../shared/components/buttons/ActionButton';
+import { CustomField } from '../../../shared/components/inputs/CustomField';
 
 export function LoginScreen({ navigation }: any) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View className="flex-1 items-center justify-center bg-white">
       <View className="w-full px-6" style={{ maxWidth: 384 }}>
@@ -13,24 +17,28 @@ export function LoginScreen({ navigation }: any) {
         </View>
 
         <View>
-          <View className="mb-4">
-            <Text className="mb-1 text-sm font-medium text-gray-700">Email</Text>
-            <TextInput
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3"
-              placeholder="tu@email.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+          <CustomField
+            label="Email"
+            placeholder="tu@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            leftIcon={<MaterialCommunityIcons name="email" size={20} color="#9ca3af" />}
+          />
 
-          <View className="mb-4">
-            <Text className="mb-1 text-sm font-medium text-gray-700">Contraseña</Text>
-            <TextInput
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3"
-              placeholder="••••••••"
-              secureTextEntry
-            />
-          </View>
+          <CustomField
+            label="Contraseña"
+            placeholder="••••••••"
+            secureTextEntry={!showPassword}
+            leftIcon={<MaterialCommunityIcons name="lock" size={20} color="#9ca3af" />}
+            rightIcon={
+              <MaterialCommunityIcons 
+                name={showPassword ? "eye-off" : "eye"} 
+                size={20} 
+                color="#9ca3af"
+                onPress={() => setShowPassword(!showPassword)}
+              />
+            }
+          />
 
           <ActionButton
             className="mt-4 w-full"
@@ -42,9 +50,12 @@ export function LoginScreen({ navigation }: any) {
 
           <View className="mt-4 flex-row flex-wrap justify-center">
             <Text className="text-gray-600">¿No tienes cuenta? </Text>
-            <Link href="/register">
-              <Text className="font-semibold text-red-600">Regístrate</Text>
-            </Link>
+            <Text
+              className="font-semibold text-red-600"
+              onPress={() => navigation.navigate('Register')}
+            >
+              Regístrate
+            </Text>
           </View>
         </View>
       </View>
