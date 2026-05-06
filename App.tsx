@@ -5,10 +5,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated as RNAnimated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // Screens - Auth
 import { LoginScreen } from './src/features/auth/screens/LoginScreen';
@@ -31,21 +31,42 @@ const Tab = createBottomTabNavigator();
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const [addMenuVisible, setAddMenuVisible] = useState(false);
+  const rotation = useRef(new RNAnimated.Value(0)).current;
 
   const tabBarItems = [
     { routeKey: 'Home', icon: 'home-outline', activeIcon: 'home', label: 'Inicio' },
-    { routeKey: 'Properties', icon: 'business-outline', activeIcon: 'business', label: 'Propiedades' },
+    { routeKey: 'Properties', icon: 'albums-outline', activeIcon: 'albums', label: 'Propiedades' },
     { routeKey: 'Agenda', icon: 'calendar-outline', activeIcon: 'calendar', label: 'Agenda' },
     { routeKey: 'Profile', icon: 'grid-outline', activeIcon: 'grid', label: 'Menú' },
   ];
 
   const isFocused = (index: number) => state.index === index;
 
+  useEffect(() => {
+    const toValue = addMenuVisible ? 45 : 0;
+    RNAnimated.timing(rotation, {
+      toValue,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [addMenuVisible]);
+
+  const toggleMenu = () => {
+    setAddMenuVisible(prev => !prev);
+  };
+
+  const iconRotationStyle = {
+    transform: [{ rotate: rotation.interpolate({
+      inputRange: [0, 45],
+      outputRange: ['0deg', '45deg'],
+    }) }],
+  };
+
   return (
     <View style={[styles.tabBarWrapper, { bottom: insets.bottom + 8 }]}>
       <TouchableOpacity
         style={styles.fabButton}
-        onPress={() => setAddMenuVisible(true)}
+        onPress={toggleMenu}
         activeOpacity={0.85}
       >
         <LinearGradient
@@ -54,7 +75,9 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           end={{ x: 1, y: 0 }}
           style={styles.fabGradient}
         >
-          <Ionicons name="add" size={30} color="#fff" />
+          <RNAnimated.View style={iconRotationStyle}>
+            <Ionicons name="add" size={30} color="#fff" />
+          </RNAnimated.View>
         </LinearGradient>
       </TouchableOpacity>
 
@@ -97,6 +120,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         onAddProperty={() => console.log('Agregar propiedad')}
         onAddAppointment={() => console.log('Agregar cita')}
         onAddOfferStatus={() => console.log('Agregar status de oferta')}
+        onUseAI={() => console.log('Agregar IA')}
       />
     </View>
   );
