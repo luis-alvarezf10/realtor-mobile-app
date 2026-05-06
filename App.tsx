@@ -18,8 +18,9 @@ import { RegisterScreen } from './src/features/auth/screens/RegisterScreen';
 import { HomeScreen } from './src/features/home/screens/HomeScreen';
 import { PropertiesListScreen } from './src/features/properties/screens/PropertiesListScreen';
 import { AgendaScreen } from './src/features/agenda/screens/AgendaScreen';
-import { ProfileScreen } from './src/features/profile/screens/ProfileScreen';
+import { MenuScreen } from './src/features/menu/screens/MenuScreen';
 import { NotificationsScreen } from './src/features/notifications/screens/NotificationsScreen';
+import { SettingsScreen } from './src/features/settings/screens/SettingsScreen';
 
 // Components
 import { AddMenu } from './src/shared/components/AddMenu';
@@ -112,7 +113,7 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Properties" component={PropertiesListScreen} />
       <Tab.Screen name="Agenda" component={AgendaScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={MenuScreen} />
     </Tab.Navigator>
   );
 }
@@ -126,6 +127,7 @@ export default function App() {
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Main" component={MainTabs} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>
