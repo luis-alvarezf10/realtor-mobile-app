@@ -7,6 +7,7 @@ import {
   FlatList,
   TextInput,
   Animated,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../shared/context/AuthContext';
@@ -206,10 +207,10 @@ export function AllAppointmentsScreen({ navigation }: any) {
                 <Text style={[styles.statValue, styles.statValueYellow]}>{totalPendiente}</Text>
                 <Text style={[styles.statLabel, styles.statLabelYellow]}>Pendientes</Text>
               </View>
-              <View style={[styles.statCard, styles.statCardGray]}>
-                <Text style={[styles.statValue, styles.statValueGray]}>{totalCancelada + totalNoAsistio}</Text>
-                <Text style={[styles.statLabel, styles.statLabelGray]}>No realizadas</Text>
-              </View>
+              {/* <View style={[styles.statCard, styles.statCardRed]}>
+                <Text style={[styles.statValue, styles.statValueRed]}>{totalCancelada + totalNoAsistio}</Text>
+                <Text style={[styles.statLabel, styles.statLabelRed]}>No realizadas</Text>
+              </View> */}
             </View>
 
             {stats.length > 0 && (
@@ -245,7 +246,11 @@ export function AllAppointmentsScreen({ navigation }: any) {
               </View>
             </View>
 
-            <View style={styles.filterContainer}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterContainer}
+            >
               {(['all', 'Realizada', 'Pendiente', 'Cancelada', 'No asistí'] as StatusFilter[]).map(status => (
                 <TouchableOpacity
                   key={status}
@@ -263,7 +268,7 @@ export function AllAppointmentsScreen({ navigation }: any) {
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
+            </ScrollView>
           </View>
         }
         renderItem={({ item }) => (
@@ -372,8 +377,8 @@ const styles = StyleSheet.create({
   statCardYellow: {
     backgroundColor: '#FFFBEB',
   },
-  statCardGray: {
-    backgroundColor: '#F3F4F6',
+  statCardRed: {
+    backgroundColor: '#FEF2F2',
   },
   statValue: {
     fontSize: 24,
@@ -386,8 +391,8 @@ const styles = StyleSheet.create({
   statValueYellow: {
     color: '#F59E0B',
   },
-  statValueGray: {
-    color: '#6B7280',
+  statValueRed: {
+    color: '#EF4444',
   },
   statLabel: {
     fontSize: 11,
@@ -402,6 +407,9 @@ const styles = StyleSheet.create({
   },
   statLabelGray: {
     color: '#6B7280',
+  },
+  statLabelRed: {
+    color: '#EF4444',
   },
   monthStatsContainer: {
     paddingHorizontal: 16,
@@ -472,9 +480,9 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
     gap: 8,
-    marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   filterChip: {
     paddingHorizontal: 14,
