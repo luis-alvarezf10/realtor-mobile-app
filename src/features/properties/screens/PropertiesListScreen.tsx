@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 
 export function PropertiesListScreen({ navigation }: any) {
   const properties = [
@@ -10,12 +11,7 @@ export function PropertiesListScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mis Propiedades</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddProperty')}>
-          <Text style={styles.addButtonText}>+ Nueva</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader title="Propiedades" onNotifications={() => navigation.navigate('Notifications')} />
 
       <FlatList
         data={properties}
@@ -45,31 +41,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAF9',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  addButton: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   listContent: {
     padding: 16,

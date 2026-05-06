@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 
-export function ReportsScreen({ navigation }: any) {
+export function AgendaScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Reportes" onNotifications={() => navigation.navigate('Notifications')} />
+      <ScreenHeader title="Agenda" onNotifications={() => navigation.navigate('Notifications')} />
       <View style={styles.content}>
-        <Text style={styles.placeholder}>Reportes</Text>
+        <Text style={styles.placeholder}>Agenda</Text>
       </View>
     </View>
   );

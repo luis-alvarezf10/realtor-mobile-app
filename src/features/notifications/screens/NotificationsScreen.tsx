@@ -1,8 +1,9 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 
-export function NotificationsScreen() {
+export function NotificationsScreen({ navigation }: any) {
   const [notifications, setNotifications] = useState([
     { id: '1', type: 'appointment', title: 'Cita pendiente mañana', message: 'Tienes una cita con Juan Pérez a las 10:00', date: '2026-05-05', read: false },
     { id: '2', type: 'appointment', title: 'Recordatorio de cita', message: 'Cita en 2 horas con María García', date: '2026-05-05', read: false },
@@ -13,10 +14,7 @@ export function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notificaciones</Text>
-        <Text style={styles.headerSubtitle}>{unreadCount} sin leer</Text>
-      </View>
+      <ScreenHeader title="Notificaciones" subtitle={`${unreadCount} sin leer`} onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.listContent}>
         {notifications.map((notification) => (
@@ -55,23 +53,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#4B5563',
-    marginTop: 4,
   },
   listContent: {
     padding: 16,
