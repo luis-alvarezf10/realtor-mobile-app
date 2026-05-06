@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
 
 type SettingsTab = 'perfil' | 'acerca' | 'ayuda';
 
 export function SettingsScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('perfil');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const tabs: { key: SettingsTab; label: string; icon: string }[] = [
     { key: 'perfil', label: 'Perfil', icon: 'person-outline' },
@@ -92,6 +94,25 @@ export function SettingsScreen({ navigation }: any) {
       <ScrollView style={styles.scrollView}>
         {renderContent()}
       </ScrollView>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutDialog(true)}>
+        <Ionicons name="log-out-outline" size={20} color="#cc2d19" />
+        <Text style={styles.logoutText}>Cerrar sesión</Text>
+      </TouchableOpacity>
+
+      <ConfirmDialog
+        visible={showLogoutDialog}
+        icon="log-out-outline"
+        title="¿Cerrar sesión?"
+        description="Tendrás que iniciar sesión nuevamente para acceder"
+        confirmLabel="Cerrar sesión"
+        cancelLabel="Cancelar"
+        onConfirm={() => {
+          setShowLogoutDialog(false);
+          navigation.navigate('Login');
+        }}
+        onCancel={() => setShowLogoutDialog(false)}
+      />
     </View>
   );
 }
@@ -215,5 +236,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    marginBottom: 32,
+    paddingVertical: 14,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  logoutText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#cc2d19',
   },
 });
