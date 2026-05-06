@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 12,
     paddingBottom: 6,
+    marginVertical: 10
   },
   sectionSubtitleLess: {
     paddingTop: 8,

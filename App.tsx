@@ -20,6 +20,7 @@ import { RegisterScreen } from './src/features/auth/screens/RegisterScreen';
 import { HomeScreen } from './src/features/home/screens/HomeScreen';
 import { PropertiesListScreen } from './src/features/properties/screens/PropertiesListScreen';
 import { AgendaScreen } from './src/features/agenda/screens/AgendaScreen';
+import { AllAppointmentsScreen } from './src/features/agenda/screens/AllAppointmentsScreen';
 import { MenuScreen } from './src/features/menu/screens/MenuScreen';
 import { NotificationsScreen } from './src/features/notifications/screens/NotificationsScreen';
 import { SettingsScreen } from './src/features/settings/screens/SettingsScreen';
@@ -201,10 +202,11 @@ function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <>
-            <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-          </>
+             <Stack.Screen name="Main" component={MainTabs} />
+             <Stack.Screen name="Notifications" component={NotificationsScreen} />
+             <Stack.Screen name="Settings" component={SettingsScreen} />
+             <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
+           </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />

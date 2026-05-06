@@ -7,9 +7,10 @@ interface ScreenHeaderProps {
   subtitle?: string;
   onBack?: () => void;
   onNotifications?: () => void;
+  onHelp?: () => void;
 }
 
-export function ScreenHeader({ title, subtitle, onBack, onNotifications }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, onBack, onNotifications, onHelp }: ScreenHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.leftSection}>
@@ -23,11 +24,18 @@ export function ScreenHeader({ title, subtitle, onBack, onNotifications }: Scree
           {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>
       </View>
-      {onNotifications && (
-        <TouchableOpacity style={styles.iconButton} onPress={onNotifications}>
-          <Ionicons name="notifications-outline" size={24} color="#111827" />
-        </TouchableOpacity>
-      )}
+      <View style={styles.rightSection}>
+        {onHelp && (
+          <TouchableOpacity style={styles.iconButton} onPress={onHelp}>
+            <Ionicons name="help-circle-outline" size={24} color="#111827" />
+          </TouchableOpacity>
+        )}
+        {onNotifications && (
+          <TouchableOpacity style={styles.iconButton} onPress={onNotifications}>
+            <Ionicons name="notifications-outline" size={24} color="#111827" />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -54,7 +62,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#111827',
   },
   titleWithBack: {
@@ -67,5 +75,10 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 4,
+  },
+  rightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });
