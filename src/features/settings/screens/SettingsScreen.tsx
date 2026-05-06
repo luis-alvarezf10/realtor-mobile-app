@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
 import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 type SettingsTab = 'perfil' | 'acerca' | 'ayuda';
 
 export function SettingsScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('perfil');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const { user, loading } = useAuth();
 
   const tabs: { key: SettingsTab; label: string; icon: string }[] = [
     { key: 'perfil', label: 'Perfil', icon: 'person-outline' },
@@ -21,11 +23,21 @@ export function SettingsScreen({ navigation }: any) {
       case 'perfil':
         return (
           <View style={styles.content}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>U</Text>
-            </View>
-            <Text style={styles.name}>Usuario</Text>
-            <Text style={styles.email}>usuario@email.com</Text>
+            {loading ? (
+              <Text>Cargando...</Text>
+            ) : (
+              <>
+                {user?.photo ? (
+                  <Image source={{ uri: user.photo }} style={styles.avatarImage} />
+                ) : (
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>{user?.name?.charAt(0) || 'U'}</Text>
+                  </View>
+                )}
+                <Text style={styles.name}>{user?.name || 'Usuario'}</Text>
+                <Text style={styles.email}>{user?.email || 'usuario@email.com'}</Text>
+              </>
+            )}
           </View>
         );
       case 'acerca':
@@ -196,6 +208,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#cc2d19',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 16,
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     marginBottom: 16,
   },
   avatarText: {

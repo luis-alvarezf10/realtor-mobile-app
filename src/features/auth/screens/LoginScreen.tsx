@@ -4,12 +4,14 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ActionButton } from '../../../shared/components/buttons/ActionButton';
 import { CustomField } from '../../../shared/components/inputs/CustomField';
 import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 export function LoginScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { fetchUser } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -52,6 +54,7 @@ export function LoginScreen({ navigation }: any) {
         return;
       }
 
+      await fetchUser();
       navigation.navigate('Main');
     } catch (error) {
       Alert.alert('Error', 'Ocurrió un error inesperado');

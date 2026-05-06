@@ -1,13 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 export function MenuScreen({ navigation }: any) {
-  const user = {
-    name: 'Carlos Ramírez',
-    email: 'carlos.ramirez@email.com',
-    photo: null,
-  };
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -19,29 +24,68 @@ export function MenuScreen({ navigation }: any) {
       </View>
 
       <View style={styles.userCard}>
-        {user.photo ? (
-          <Image source={{ uri: user.photo }} style={styles.avatar} />
+        {user?.photo ? (
+          <Image source={{ uri: user.photo }} style={styles.avatarImage} />
         ) : (
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{user.name.charAt(0)}</Text>
+            <Text style={styles.avatarText}>{user?.fullname?.charAt(0) || 'U'}</Text>
           </View>
         )}
         <View style={styles.userInfo}>
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
+          <Text style={styles.userName}>{user?.fullname || 'Usuario'}</Text>
+          <Text style={styles.userEmail}>{user?.email || ''}</Text>
+          {user?.phone && <Text style={styles.userPhone}>{user.phone}</Text>}
         </View>
       </View>
 
-      <Text style={styles.sectionSubtitle}>Registros</Text>
+      <Text style={styles.sectionSubtitle}>Gestión Financiera</Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.recordsScroll}
+        style={styles.recordsContainer}
+      >
+        <TouchableOpacity style={styles.recordItem}>
+          <View style={styles.recordIcon}>
+            <Ionicons name="flag-outline" size={24} color="#cc2d19" />
+          </View>
+          <Text style={styles.recordLabel}>Estados de citas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.recordItem}>
+          <View style={styles.recordIcon}>
+            <Ionicons name="trending-up-outline" size={24} color="#cc2d19" />
+          </View>
+          <Text style={styles.recordLabel}>Estadísticas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.recordItem}>
+          <View style={styles.recordIcon}>
+            <Ionicons name="wallet-outline" size={24} color="#cc2d19" />
+          </View>
+          <Text style={styles.recordLabel}>Finanzas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.recordItem}>
+          <View style={styles.recordIcon}>
+            <Ionicons name="swap-horizontal-outline" size={24} color="#cc2d19" />
+          </View>
+          <Text style={styles.recordLabel}>Transacciones</Text>
+        </TouchableOpacity>
+      </ScrollView>
 
-      <View style={styles.records}>
+      <Text style={[styles.sectionSubtitle, styles.sectionSubtitleLess]}>Registros</Text>
+
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.recordsScroll}
+        style={styles.recordsContainer}
+      >
         <TouchableOpacity style={styles.recordItem}>
           <View style={styles.recordIcon}>
             <Ionicons name="people-outline" size={24} color="#cc2d19" />
           </View>
           <Text style={styles.recordLabel}>Clientes</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -86,12 +130,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   avatar: {
-    width: 52,
-    height: 52,
+    width: 60,
+    height: 60,
     borderRadius: 26,
     backgroundColor: '#cc2d19',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
   },
   avatarText: {
     fontSize: 22,
@@ -102,38 +151,51 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: '600',
     color: '#111827',
   },
   userEmail: {
     fontSize: 14,
     color: '#6B7280',
-    marginTop: 2,
+    marginTop: 6,
+  },
+  userPhone: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 6,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#686868',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 8,
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 6,
   },
-  records: {
+  sectionSubtitleLess: {
+    paddingTop: 8,
+  },
+  recordsScroll: {
     paddingHorizontal: 16,
     gap: 12,
     flexDirection: 'row',
-    flexWrap: 'wrap',
+  },
+  recordsContainer: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 104,
+    marginBottom: 4,
   },
   recordItem: {
     alignItems: 'center',
-    width: 72,
+    width: 85,
   },
   recordIcon: {
-    width: 56,
-    height: 56,
+    width: 60,
+    height: 60,
     borderRadius: 28,
     backgroundColor: '#FEF2F2',
     alignItems: 'center',

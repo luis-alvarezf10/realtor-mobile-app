@@ -10,6 +10,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from './src/lib/supabase';
+import { AuthProvider } from './src/shared/context/AuthContext';
 
 // Screens - Auth
 import { LoginScreen } from './src/features/auth/screens/LoginScreen';
@@ -219,7 +220,9 @@ function AppNavigator() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppNavigator />
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
