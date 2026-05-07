@@ -231,15 +231,9 @@ export function AgendaScreen({ navigation }: any) {
 
         <View style={styles.appointmentsSection}>
           <View style={styles.appointmentsHeader}>
-            <Text style={styles.appointmentsDate}>
-              {new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </Text>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => console.log('Add appointment')}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-            </TouchableOpacity>
+          <Text style={styles.appointmentsDate}>
+            {new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </Text>
           </View>
 
           {loading ? (
@@ -459,19 +453,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111827',
     textTransform: 'capitalize',
-  },
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#cc2d19',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#cc2d19',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
   },
   emptyState: {
     alignItems: 'center',

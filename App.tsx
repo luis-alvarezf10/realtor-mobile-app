@@ -24,6 +24,7 @@ import { AllAppointmentsScreen } from './src/features/agenda/screens/AllAppointm
 import { MenuScreen } from './src/features/menu/screens/MenuScreen';
 import { NotificationsScreen } from './src/features/notifications/screens/NotificationsScreen';
 import { SettingsScreen } from './src/features/settings/screens/SettingsScreen';
+import { ChatScreen } from './src/features/chat/screens/ChatScreen';
 
 // Components
 import { AddMenu } from './src/shared/components/AddMenu';
@@ -123,7 +124,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         onAddProperty={() => console.log('Agregar propiedad')}
         onAddAppointment={() => console.log('Agregar cita')}
         onAddOfferStatus={() => console.log('Agregar status de oferta')}
-        onUseAI={() => console.log('Agregar IA')}
+        onUseAI={() => navigation.getParent()?.navigate('Chat')}
       />
     </View>
   );
@@ -206,6 +207,7 @@ function AppNavigator() {
              <Stack.Screen name="Notifications" component={NotificationsScreen} />
              <Stack.Screen name="Settings" component={SettingsScreen} />
              <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
+             <Stack.Screen name="Chat" component={ChatScreen} />
            </>
         ) : (
           <>
