@@ -19,6 +19,7 @@ import { RegisterScreen } from './src/features/auth/screens/RegisterScreen';
 // Screens - Main Features
 import { HomeScreen } from './src/features/home/screens/HomeScreen';
 import { PropertiesListScreen } from './src/features/properties/screens/PropertiesListScreen';
+import { PropertyDetailScreen } from './src/features/properties/screens/PropertyDetailScreen';
 import { AgendaScreen } from './src/features/agenda/screens/AgendaScreen';
 import { AllAppointmentsScreen } from './src/features/agenda/screens/AllAppointmentsScreen';
 import { MenuScreen } from './src/features/menu/screens/MenuScreen';
@@ -208,6 +209,7 @@ function AppNavigator() {
              <Stack.Screen name="Settings" component={SettingsScreen} />
              <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
              <Stack.Screen name="Chat" component={ChatScreen} />
+             <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
            </>
         ) : (
           <>

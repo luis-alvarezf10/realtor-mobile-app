@@ -40,10 +40,13 @@ type Property = {
   title: string;
   description: string | null;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   status: string;
   created_at: string;
   type_properties: PropertyType | PropertyType[] | null;
   details_properties: PropertyDetails | PropertyDetails[] | null;
+  type_offers: { value: string } | { value: string }[] | null;
 };
 
 export function PropertiesListScreen({ navigation }: any) {
@@ -76,6 +79,8 @@ export function PropertiesListScreen({ navigation }: any) {
         title,
         description,
         address,
+        latitude,
+        longitude,
         status,
         created_at,
         type_properties (
@@ -92,6 +97,9 @@ export function PropertiesListScreen({ navigation }: any) {
           price,
           is_furnished,
           period
+        ),
+        type_offers (
+          value
         )
       `)
       .eq('id_advisor', user.id)
@@ -169,10 +177,11 @@ export function PropertiesListScreen({ navigation }: any) {
   const renderPropertyGrid = ({ item }: { item: Property }) => {
     const details = firstRelation(item.details_properties);
     const propertyType = firstRelation(item.type_properties);
+    const offerType = firstRelation(item.type_offers);
     const statusStyle = getStatusStyle(item.status);
 
     return (
-      <TouchableOpacity style={styles.gridCard} activeOpacity={0.86}>
+      <TouchableOpacity style={styles.gridCard} activeOpacity={0.86} onPress={() => navigation.navigate('PropertyDetail', { property: item })}>
         <View style={styles.gridImageWrap}>
           {item.image ? (
             <Image source={{ uri: item.image }} style={styles.gridPropertyImage} />
@@ -190,7 +199,7 @@ export function PropertiesListScreen({ navigation }: any) {
           {!!details?.price && (
             <View style={styles.gridPriceBadge}>
               <Text style={styles.gridPriceText}>
-                {formatPrice(details.price, propertyType?.value, details.period)}
+                {formatPrice(details.price, offerType?.value, details.period)}
               </Text>
             </View>
           )}
@@ -487,12 +496,15 @@ function getStatusStyle(status: string) {
   return { color: '#6B7280', backgroundColor: '#F3F4F6' };
 }
 
-function formatPrice(price?: number | null, propertyTypeValue?: string | null, period?: string | null) {
+function formatPrice(price?: number | null, offerTypeValue?: string | null, period?: string | null) {
   if (!price) {
     return 'Precio por definir';
   }
 
   const formatted = `${Math.round(price).toLocaleString('en-US')}$`;
+  const isRental = offerTypeValue && ['alquiler', 'renta', 'rent', 'lease'].includes(offerTypeValue.toLowerCase());
+  if (!isRental) return formatted;
+
   const periodMap: Record<string, string> = { monthly: 'mes', yearly: 'año', weekly: 'semana', daily: 'día' };
   const periodLabel = period ? (periodMap[period.toLowerCase()] || period) : null;
   return periodLabel ? `${formatted} / ${periodLabel}` : formatted;
