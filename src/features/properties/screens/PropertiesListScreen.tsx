@@ -59,8 +59,6 @@ export function PropertiesListScreen({ navigation }: any) {
   const [filterHalfBaths, setFilterHalfBaths] = useState<string>('');
   const [filterParking, setFilterParking] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-
   const fetchProperties = useCallback(async () => {
     if (!user?.id) {
       setProperties([]);
@@ -119,11 +117,6 @@ export function PropertiesListScreen({ navigation }: any) {
     setRefreshing(true);
     fetchProperties();
   };
-
-  const totalAvailable = useMemo(
-    () => properties.filter((property) => normalizeStatus(property.status) === 'available').length,
-    [properties],
-  );
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -188,13 +181,16 @@ export function PropertiesListScreen({ navigation }: any) {
               <Ionicons name="home-outline" size={24} color="#cc2d19" />
             </View>
           )}
-          <View style={styles.gridStatusPill}>
+          <View style={[styles.gridStatusPill, { backgroundColor: statusStyle.backgroundColor }]}>
             <View style={[styles.gridStatusDot, { backgroundColor: statusStyle.color }]} />
+            <Text style={[styles.gridStatusText, { color: statusStyle.color }]}>
+              {item.status === 'available' ? 'Disponible' : item.status === 'reserved' ? 'Reservado' : item.status === 'saled' ? 'Vendido' : item.status === 'rented' ? 'Alquilado' : item.status}
+            </Text>
           </View>
           {!!details?.price && (
             <View style={styles.gridPriceBadge}>
               <Text style={styles.gridPriceText}>
-                {formatPrice(details.price, details.period)}
+                {formatPrice(details.price, propertyType?.value, details.period)}
               </Text>
             </View>
           )}
@@ -248,100 +244,9 @@ export function PropertiesListScreen({ navigation }: any) {
     );
   };
 
-  const renderProperty = ({ item }: { item: Property }) => {
-    const details = firstRelation(item.details_properties);
-    const propertyType = firstRelation(item.type_properties);
-    const statusStyle = getStatusStyle(item.status);
-
-    return (
-      <TouchableOpacity style={styles.card} activeOpacity={0.86}>
-        <View style={styles.imageWrap}>
-          {item.image ? (
-            <Image source={{ uri: item.image }} style={styles.propertyImage} />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="home-outline" size={32} color="#cc2d19" />
-            </View>
-          )}
-          <View style={styles.imageOverlay} />
-          <View style={[styles.statusPill, { backgroundColor: statusStyle.backgroundColor }]}>
-            <View style={[styles.statusDot, { backgroundColor: statusStyle.color }]} />
-            <Text style={[styles.statusText, { color: statusStyle.color }]} numberOfLines={1}>
-              {item.status}
-            </Text>
-          </View>
-          {!!details?.price && (
-            <View style={styles.priceBadge}>
-              <Text style={styles.priceBadgeText}>
-                {formatPrice(details.price, details.period)}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.cardBody}>
-          <View style={styles.cardHeader}>
-            <View style={styles.titleBlock}>
-              <Text style={styles.propertyTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
-              {!!item.address && (
-                <View style={styles.addressRow}>
-                  <Ionicons name="location" size={13} color="#6B7280" />
-                  <Text style={styles.propertyAddress} numberOfLines={1}>
-                    {item.address}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.specsRow}>
-            {details?.area_sqm && <Spec icon="resize" label={formatArea(details.area_sqm)} />}
-            {details?.bedrooms ? <Spec icon="bed" label={`${details.bedrooms} hab`} /> : null}
-            {(details?.bathrooms || details?.half_bath) && (
-              <Spec icon="water" label={formatBathrooms(details.bathrooms, details.half_bath)} />
-            )}
-            {details?.parking_spots ? <Spec icon="car" label={`${details.parking_spots} est`} /> : null}
-          </View>
-
-          <View style={styles.badgeRow}>
-            {!!propertyType?.value && (
-              <View style={[styles.typeBadge, propertyType.color ? { backgroundColor: `${propertyType.color}18` } : null]}>
-                <Ionicons name="pricetag" size={12} color={propertyType.color || '#cc2d19'} />
-                <Text style={[styles.typeText, propertyType.color ? { color: propertyType.color } : null]}>
-                  {propertyType.value}
-                </Text>
-              </View>
-            )}
-            {details?.is_furnished && (
-              <View style={styles.furnishedBadge}>
-                <Ionicons name="checkmark-circle" size={13} color="#047857" />
-                <Text style={styles.furnishedText}>Amoblado</Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <ScreenHeader title="Propiedades" onNotifications={() => navigation.navigate('Notifications')} />
-
-      <View style={styles.summary}>
-        <View>
-          <Text style={styles.summaryLabel}>Inventario</Text>
-          <Text style={styles.summaryTitle}>{properties.length} propiedades</Text>
-        </View>
-        <View style={styles.summaryBadge}>
-          <Text style={styles.summaryBadgeValue}>{totalAvailable}</Text>
-          <Text style={styles.summaryBadgeLabel}>Disponibles</Text>
-        </View>
-      </View>
 
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#9CA3AF" />
@@ -362,12 +267,6 @@ export function PropertiesListScreen({ navigation }: any) {
           onPress={() => setShowFilters(true)}
         >
           <Ionicons name="options" size={18} color={hasActiveFilters ? '#fff' : '#6B7280'} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.viewToggleButton}
-          onPress={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-        >
-          <Ionicons name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'} size={18} color="#6B7280" />
         </TouchableOpacity>
       </View>
 
@@ -396,11 +295,10 @@ export function PropertiesListScreen({ navigation }: any) {
         <FlatList
           data={filteredProperties}
           keyExtractor={(item) => item.id}
-          numColumns={viewMode === 'grid' ? 2 : 1}
-          key={viewMode}
-          renderItem={viewMode === 'grid' ? renderPropertyGrid : renderProperty}
-          ItemSeparatorComponent={() => viewMode === 'grid' ? <View style={{ width: 12 }} /> : null}
-          columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
+          numColumns={2}
+          renderItem={renderPropertyGrid}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+          columnWrapperStyle={styles.gridRow}
           contentContainerStyle={[
             styles.listContent,
             filteredProperties.length === 0 && styles.emptyListContent,
@@ -555,15 +453,6 @@ function FilterSection({ title, children }: { title: string; children: React.Rea
   );
 }
 
-function Spec({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
-  return (
-    <View style={styles.specItem}>
-      <Ionicons name={icon} size={15} color="#6B7280" />
-      <Text style={styles.specText}>{label}</Text>
-    </View>
-  );
-}
-
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
   if (Array.isArray(value)) {
     return value[0] || null;
@@ -587,20 +476,26 @@ function getStatusStyle(status: string) {
     return { color: '#B45309', backgroundColor: '#FFFBEB' };
   }
 
-  if (normalized === 'saled' || normalized === 'rented') {
-    return { color: '#1D4ED8', backgroundColor: '#EFF6FF' };
+  if (normalized === 'saled') {
+    return { color: '#7C3AED', backgroundColor: '#F5F3FF' };
+  }
+
+  if (normalized === 'rented') {
+    return { color: '#2563EB', backgroundColor: '#EFF6FF' };
   }
 
   return { color: '#6B7280', backgroundColor: '#F3F4F6' };
 }
 
-function formatPrice(price?: number | null, period?: string | null) {
+function formatPrice(price?: number | null, propertyTypeValue?: string | null, period?: string | null) {
   if (!price) {
     return 'Precio por definir';
   }
 
-  const formatted = `$${Math.round(price).toLocaleString('en-US')}`;
-  return period ? `${formatted} / ${period}` : formatted;
+  const formatted = `${Math.round(price).toLocaleString('en-US')}$`;
+  const periodMap: Record<string, string> = { monthly: 'mes', yearly: 'año', weekly: 'semana', daily: 'día' };
+  const periodLabel = period ? (periodMap[period.toLowerCase()] || period) : null;
+  return periodLabel ? `${formatted} / ${periodLabel}` : formatted;
 }
 
 function formatArea(area?: number | null) {
@@ -626,48 +521,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAF9',
   },
-  summary: {
-    marginHorizontal: 16,
-    marginTop: 14,
-    marginBottom: 6,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: '#1C2B36',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  summaryLabel: {
-    color: '#CBD5E1',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  summaryTitle: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: 4,
-  },
-  summaryBadge: {
-    minWidth: 90,
-    alignItems: 'center',
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  summaryBadgeValue: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
-  },
-  summaryBadgeLabel: {
-    color: '#CBD5E1',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
-  },
   listContent: {
     padding: 16,
     paddingBottom: 140,
@@ -675,121 +528,7 @@ const styles = StyleSheet.create({
   emptyListContent: {
     flexGrow: 1,
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    marginBottom: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  imageWrap: {
-    height: 180,
-    backgroundColor: '#F3F4F6',
-    position: 'relative',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-  },
-  propertyImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FEF2F2',
-  },
-  priceBadge: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  priceBadgeText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#cc2d19',
-  },
-  statusPill: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  cardBody: {
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  titleBlock: {
-    flex: 1,
-  },
-  propertyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#111827',
-    lineHeight: 22,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 6,
-  },
-  propertyAddress: {
-    flex: 1,
-    color: '#6B7280',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-    marginVertical: 14,
-  },
-  specsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
+
   specItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -804,40 +543,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  typeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    backgroundColor: '#FEE2E2',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  typeText: {
-    color: '#7F1D1D',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  furnishedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  furnishedText: {
-    color: '#047857',
-    fontSize: 12,
-    fontWeight: '700',
-  },
+
   centerState: {
     flex: 1,
     alignItems: 'center',
@@ -911,14 +617,6 @@ const styles = StyleSheet.create({
   filterButtonActive: {
     backgroundColor: '#cc2d19',
   },
-  viewToggleButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   gridRow: {
     gap: 12,
   },
@@ -955,17 +653,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#047857',
-    borderWidth: 2,
-    borderColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4,
   },
   gridStatusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  gridStatusText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
   gridPriceBadge: {
     position: 'absolute',
