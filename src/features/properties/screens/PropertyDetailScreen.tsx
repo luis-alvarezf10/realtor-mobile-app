@@ -13,7 +13,9 @@ import {
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
+import ViewShot from 'react-native-view-shot';
 import * as Location from 'expo-location';
+import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 
@@ -77,8 +79,10 @@ type Property = {
 export function PropertyDetailScreen({ route, navigation }: any) {
   const property: Property = route.params.property;
   const mapRef = useRef<MapView>(null);
+  const flyerRef = useRef<any>(null);
   const [showDirections, setShowDirections] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const details = useMemo(() => {
@@ -222,6 +226,32 @@ export function PropertyDetailScreen({ route, navigation }: any) {
             </>
           )}
 
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>Compartir</Text>
+            <TouchableOpacity
+              style={[styles.shareButton, sharing && styles.directionsButtonDisabled]}
+              onPress={async () => {
+                setSharing(true);
+                try {
+                  const uri = await flyerRef.current?.capture?.();
+                  if (uri && await Sharing.isAvailableAsync()) {
+                    await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir propiedad' });
+                  }
+                } catch {}
+                setSharing(false);
+              }}
+              disabled={sharing}
+            >
+              {sharing ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="share-social" size={18} color="#fff" />
+              )}
+              <Text style={styles.shareText}>{sharing ? 'Generando...' : 'Compartir propiedad'}</Text>
+            </TouchableOpacity>
+          </>
+
           {hasLocation && (
             <>
               <View style={styles.divider} />
@@ -309,6 +339,15 @@ export function PropertyDetailScreen({ route, navigation }: any) {
           </MapView>
         </View>
       </Modal>
+    </View>
+  );
+}
+
+function FlyerDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.flyerDetailItem}>
+      <Text style={styles.flyerDetailLabel}>{label}</Text>
+      <Text style={styles.flyerDetailValue}>{value}</Text>
     </View>
   );
 }
@@ -541,5 +580,141 @@ const styles = StyleSheet.create({
   },
   fullMap: {
     flex: 1,
+  },
+  shareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#cc2d19',
+    borderRadius: 14,
+    paddingVertical: 14,
+  },
+  shareText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  flyerHidden: {
+    position: 'absolute',
+    top: -10000,
+    left: 0,
+    width: SCREEN_WIDTH,
+  },
+  flyer: {
+    width: SCREEN_WIDTH,
+    backgroundColor: '#fff',
+  },
+  flyerBrand: {
+    backgroundColor: '#1C2B36',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  flyerBrandText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: 4,
+  },
+  flyerImage: {
+    width: SCREEN_WIDTH,
+    height: 220,
+    backgroundColor: '#F3F4F6',
+  },
+  flyerImagePlaceholder: {
+    width: SCREEN_WIDTH,
+    height: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+  },
+  flyerBody: {
+    padding: 20,
+  },
+  flyerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111827',
+    lineHeight: 26,
+  },
+  flyerAddressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 8,
+  },
+  flyerAddress: {
+    flex: 1,
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  flyerPrice: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#cc2d19',
+    marginTop: 12,
+  },
+  flyerStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  flyerStatusBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  flyerStatusText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  flyerTypeBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  flyerTypeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  flyerDetailsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  flyerDetailItem: {
+    width: '48%',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 10,
+    padding: 12,
+  },
+  flyerDetailLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    textTransform: 'uppercase',
+  },
+  flyerDetailValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+    marginTop: 4,
+  },
+  flyerFooter: {
+    backgroundColor: '#1C2B36',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  flyerFooterText: {
+    color: '#CBD5E1',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 2,
   },
 });
