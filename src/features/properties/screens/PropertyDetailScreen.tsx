@@ -1,18 +1,43 @@
-import { useMemo } from 'react';
+﻿import { useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
+import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
+
+const mapStyle = [
+  { elementType: 'geometry', stylers: [{ color: '#f5f0eb' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#4a4a4a' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f0eb' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e8e0d8' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#cc2d19' }] },
+  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#f0ebe5' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#d9d0c6' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#d4dce4' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#6b7b8b' }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b7b8b' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
+  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#d9d0c6' }] },
+  { featureType: 'administrative', elementType: 'labels.text.fill', stylers: [{ color: '#4a4a4a' }] },
+];
 
 type Property = {
   id: string;
@@ -51,6 +76,10 @@ type Property = {
 
 export function PropertyDetailScreen({ route, navigation }: any) {
   const property: Property = route.params.property;
+  const mapRef = useRef<MapView>(null);
+  const [showDirections, setShowDirections] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   const details = useMemo(() => {
     if (Array.isArray(property.details_properties)) {
@@ -77,6 +106,37 @@ export function PropertyDetailScreen({ route, navigation }: any) {
   const statusLabel = getStatusLabel(property.status);
 
   const hasLocation = property.latitude && property.longitude;
+
+  const openDirections = async () => {
+    if (!property.latitude || !property.longitude) return;
+    setLoadingLocation(true);
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setLoadingLocation(false);
+      return;
+    }
+    const loc = await Location.getCurrentPositionAsync({});
+    setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+    setLoadingLocation(false);
+    setShowDirections(true);
+  };
+
+  const destLat = property.latitude!;
+  const destLng = property.longitude!;
+
+  const mapRegion = userLocation
+    ? {
+        latitude: (userLocation.latitude + destLat) / 2,
+        longitude: (userLocation.longitude + destLng) / 2,
+        latitudeDelta: Math.abs(userLocation.latitude - destLat) * 1.8 + 0.02,
+        longitudeDelta: Math.abs(userLocation.longitude - destLng) * 1.8 + 0.02,
+      }
+    : {
+        latitude: destLat,
+        longitude: destLng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
 
   return (
     <View style={styles.container}>
@@ -169,28 +229,86 @@ export function PropertyDetailScreen({ route, navigation }: any) {
               <View style={styles.mapContainer}>
                 <MapView
                   style={styles.map}
-                  provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                  provider={PROVIDER_GOOGLE}
+                  customMapStyle={mapStyle}
                   initialRegion={{
-                    latitude: property.latitude!,
-                    longitude: property.longitude!,
+                    latitude: destLat,
+                    longitude: destLng,
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
                   }}
                 >
                   <Marker
-                    coordinate={{
-                      latitude: property.latitude!,
-                      longitude: property.longitude!,
-                    }}
+                    coordinate={{ latitude: destLat, longitude: destLng }}
                     title={property.title}
                     description={property.address || ''}
                   />
                 </MapView>
               </View>
+              <TouchableOpacity style={[styles.directionsButton, loadingLocation && styles.directionsButtonDisabled]} onPress={openDirections} disabled={loadingLocation}>
+                {loadingLocation ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="navigate" size={18} color="#fff" />
+                )}
+                <Text style={styles.directionsText}>{loadingLocation ? 'Obteniendo ubicación...' : 'Cómo llegar'}</Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
       </ScrollView>
+
+      <Modal visible={showDirections} animationType="slide" presentationStyle="fullScreen">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowDirections(false)} style={styles.modalBack}>
+              <Ionicons name="arrow-back" size={24} color="#111827" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Cómo llegar</Text>
+            <View style={{ width: 32 }} />
+          </View>
+          <MapView
+            ref={mapRef}
+            style={styles.fullMap}
+            provider={PROVIDER_GOOGLE}
+            customMapStyle={mapStyle}
+            initialRegion={mapRegion}
+            showsUserLocation
+            showsMyLocationButton
+          >
+            {userLocation && (
+              <Marker
+                coordinate={userLocation}
+                title="Tu ubicación"
+                pinColor="#3B82F6"
+              />
+            )}
+            <Marker
+              coordinate={{ latitude: destLat, longitude: destLng }}
+              title={property.title}
+              description={property.address || ''}
+            />
+            {userLocation && (
+              <MapViewDirections
+                origin={userLocation}
+                destination={{ latitude: destLat, longitude: destLng }}
+                apikey={GOOGLE_MAPS_APIKEY}
+                strokeWidth={4}
+                strokeColor="#cc2d19"
+                mode="DRIVING"
+                precision="high"
+                onReady={(result) => {
+                  if (result?.coordinates) {
+                    mapRef.current?.fitToCoordinates(result.coordinates, {
+                      edgePadding: { top: 80, right: 80, bottom: 80, left: 80 },
+                    });
+                  }
+                }}
+              />
+            )}
+          </MapView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -380,5 +498,48 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: 200,
+  },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#cc2d19',
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 12,
+  },
+  directionsText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  directionsButtonDisabled: {
+    opacity: 0.7,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalBack: {
+    padding: 4,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  fullMap: {
+    flex: 1,
   },
 });
