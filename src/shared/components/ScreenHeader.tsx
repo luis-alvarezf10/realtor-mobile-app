@@ -3,36 +3,66 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ScreenHeaderProps {
-  title: string;
+  title?: string;
   subtitle?: string;
+  userName?: string;
+  companyName?: string;
   onBack?: () => void;
   onNotifications?: () => void;
   onHelp?: () => void;
+  theme?: 'light' | 'dark';
 }
 
-export function ScreenHeader({ title, subtitle, onBack, onNotifications, onHelp }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, userName, companyName, onBack, onNotifications, onHelp, theme = 'light' }: ScreenHeaderProps) {
+  const isDark = theme === 'dark';
+  const textColor = isDark ? '#FFFFFF' : '#111827';
+  const subtitleColor = isDark ? '#E5E7EB' : '#6B7280';
+  const backgroundColor = isDark ? 'transparent' : '#fff';
+
+  if (userName) {
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <View style={styles.leftSection}>
+          <Ionicons name="person-circle-outline" size={24} color={textColor} />
+          <Text style={[styles.userName, { color: textColor }]} numberOfLines={1}>{userName}</Text>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={[styles.goHunter, { color: textColor }]}>Go Hunter</Text>
+          {companyName && <Text style={[styles.companyName, { color: subtitleColor }]} numberOfLines={1}>{companyName}</Text>}
+        </View>
+        <View style={styles.rightSection}>
+          {onNotifications && (
+            <TouchableOpacity style={styles.iconButton} onPress={onNotifications}>
+              <Ionicons name="notifications-outline" size={24} color={textColor} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       <View style={styles.leftSection}>
         {onBack && (
           <TouchableOpacity style={styles.iconButton} onPress={onBack}>
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color={textColor} />
           </TouchableOpacity>
         )}
         <View style={styles.titleContainer}>
-          <Text style={[styles.title, onBack && styles.titleWithBack]}>{title}</Text>
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          <Text style={[styles.title, onBack && styles.titleWithBack, { color: textColor }]}>{title}</Text>
+          {subtitle && <Text style={[styles.subtitle, { color: subtitleColor }]}>{subtitle}</Text>}
         </View>
       </View>
       <View style={styles.rightSection}>
         {onHelp && (
           <TouchableOpacity style={styles.iconButton} onPress={onHelp}>
-            <Ionicons name="help-circle-outline" size={24} color="#111827" />
+            <Ionicons name="help-circle-outline" size={24} color={textColor} />
           </TouchableOpacity>
         )}
         {onNotifications && (
           <TouchableOpacity style={styles.iconButton} onPress={onNotifications}>
-            <Ionicons name="notifications-outline" size={24} color="#111827" />
+            <Ionicons name="notifications-outline" size={24} color={textColor} />
           </TouchableOpacity>
         )}
       </View>
@@ -48,14 +78,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   leftSection: {
+    display: 'flex',
+    gap: 2,
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  centerSection: {
+    flex: 2,
+    alignItems: 'center',
+  },
+  goHunter: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  companyName: {
+    fontSize: 12,
+    marginTop: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    maxWidth: 120,
   },
   titleContainer: {
     flexShrink: 1,
@@ -63,14 +109,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#111827',
   },
   titleWithBack: {
     marginLeft: 4,
   },
   subtitle: {
     fontSize: 13,
-    color: '#6B7280',
     marginTop: 2,
   },
   iconButton: {
@@ -79,6 +123,8 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    flex: 1,
     gap: 4,
   },
 });
