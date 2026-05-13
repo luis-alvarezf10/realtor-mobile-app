@@ -41,6 +41,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const tabBarItems = [
     { routeKey: 'Home', icon: 'home-outline', activeIcon: 'home', label: 'Inicio' },
     { routeKey: 'Properties', icon: 'albums-outline', activeIcon: 'albums', label: 'Propiedades' },
+    { routeKey: 'Chat', icon: 'chatbubble-ellipses-outline', activeIcon: 'chatbubble-ellipses', label: 'Hunterito' },
     { routeKey: 'Agenda', icon: 'calendar-outline', activeIcon: 'calendar', label: 'Agenda' },
     { routeKey: 'Profile', icon: 'grid-outline', activeIcon: 'grid', label: 'Menú' },
   ];
@@ -61,10 +62,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
 
   const iconRotationStyle = {
-    transform: [{ rotate: rotation.interpolate({
-      inputRange: [0, 45],
-      outputRange: ['0deg', '45deg'],
-    }) }],
+    transform: [{
+      rotate: rotation.interpolate({
+        inputRange: [0, 45],
+        outputRange: ['0deg', '45deg'],
+      })
+    }],
   };
 
   return (
@@ -88,8 +91,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
       <View style={styles.floatingBar}>
         <BlurView
-          intensity={75}
-          tint="light"
+          intensity={85}
+          tint="dark"
           style={styles.blurBackground}
         />
         <View style={styles.tabContent}>
@@ -141,6 +144,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Properties" component={PropertiesListScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
       <Tab.Screen name="Agenda" component={AgendaScreen} />
       <Tab.Screen name="Profile" component={MenuScreen} />
     </Tab.Navigator>
@@ -204,13 +208,13 @@ function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <>
-             <Stack.Screen name="Main" component={MainTabs} />
-             <Stack.Screen name="Notifications" component={NotificationsScreen} />
-             <Stack.Screen name="Settings" component={SettingsScreen} />
-             <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
-             <Stack.Screen name="Chat" component={ChatScreen} />
-             <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
-           </>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -264,7 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
     flex: 1,
-    backgroundColor: 'rgba(245, 245, 247, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
   },
   blurBackground: {
     position: 'absolute',
