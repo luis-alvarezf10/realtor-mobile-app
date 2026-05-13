@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
@@ -6,6 +7,26 @@ import { Ionicons } from '@expo/vector-icons';
 
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
+
+  const calendarDays = useMemo(() => {
+    const days = [];
+    const today = new Date();
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    for (let i = 0; i < 15; i++) {
+      const nextDate = new Date(today);
+      nextDate.setDate(today.getDate() + i);
+      days.push({
+        id: i.toString(),
+        date: nextDate,
+        dayName: dayNames[nextDate.getDay()],
+        dayNumber: nextDate.getDate(),
+        // Mock de algunas citas en días aleatorios
+        hasAppointment: i === 2 || i === 5 || i === 8 || i === 12,
+        isToday: i === 0,
+      });
+    }
+    return days;
+  }, []);
 
   return (
     <LinearGradient
@@ -85,6 +106,21 @@ export function HomeScreen({ navigation }: any) {
             </View>
             <Text style={styles.statValue}>5</Text>
           </View>
+        </View>
+
+        <View style={styles.calendarSection}>
+          <View style={styles.calendarHeader}>
+            <Text style={styles.sectionTitle}>Próximos días</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.calendarScroll}>
+            {calendarDays.map(day => (
+              <TouchableOpacity key={day.id} style={[styles.dayCard, day.isToday && styles.todayCard]}>
+                <Text style={[styles.dayName, day.isToday && styles.todayText]}>{day.dayName}</Text>
+                <Text style={[styles.dayNumber, day.isToday && styles.todayText]}>{day.dayNumber}</Text>
+                {day.hasAppointment && <View style={styles.appointmentDot} />}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       </ScrollView>
     </LinearGradient>
@@ -213,5 +249,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  // Calendar styles
+  calendarSection: {
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  calendarHeader: {
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#d1d1d1ff',
+    textTransform: 'uppercase',
+  },
+  calendarScroll: {
+    paddingRight: 20,
+    gap: 12,
+  },
+  dayCard: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  todayCard: {
+    borderColor: '#FF383C80',
+    backgroundColor: 'rgba(255, 56, 60, 0.1)',
+  },
+  dayName: {
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.6)',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  dayNumber: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+  todayText: {
+    color: '#FFF',
+    fontWeight: '800',
+  },
+  appointmentDot: {
+    position: 'absolute',
+    top: -1,
+    right: -1,
+    width: 12,
+    height: 12,
+    borderRadius: 20,
+    backgroundColor: '#FF383C',
   },
 });
