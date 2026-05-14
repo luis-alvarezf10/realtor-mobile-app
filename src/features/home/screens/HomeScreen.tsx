@@ -122,6 +122,79 @@ export function HomeScreen({ navigation }: any) {
             ))}
           </ScrollView>
         </View>
+        <View style={styles.scheduleCard}>
+          <View style={styles.iconContainer}>
+            <LinearGradient
+              colors={['#FF383C80', '#99222480']}
+              style={StyleSheet.absoluteFill}
+            />
+            <Ionicons name="time-outline" size={20} color="#FFF" />
+          </View>
+          <View>
+            <View className='flex flex-row gap-2 items-center'>
+              <Text className="text-white text-lg">Próxima cita en</Text>
+              <Text className="text-amber-500 font-bold text-lg">5h 33m</Text>
+            </View>
+            <View>
+              <Text className="text-gray-300 text-sm">Visita en Calle Falsa 123 - Carlos Perez</Text>
+            </View>
+          </View>
+        </View>
+        <View className='flex flex-col gap-4' style={{ marginBottom: 30}}>
+          <Text style={styles.sectionTitle}>Recomendaciones del día</Text>
+          <View style={styles.recommendationCard}>
+            <View className='flex-1 flex-row gap-4 items-center'>
+              <View>
+                <Ionicons name="flash-outline" size={20} color="#BF2F32" />
+              </View>
+              <View className='flex-1'>
+                <Text className="text-white text-lg">Alta probabilidad de cierre</Text>
+                <Text className="text-gray-300 text-sm">Visita en Calle Falsa 123 - Carlos Perez</Text>
+              </View>
+            </View>
+            <View className='items-center'>
+              <Text className='text-lg text-amber-500 font-bold text-center bg-amber-500/20 rounded-full px-4'>85 %</Text>
+              <Text className='uppercase text-xs text-gray-400'>Probabilidad</Text>
+              <Text className='uppercase text-xs text-white'>De venta</Text>
+            </View>
+          </View>
+          <View style={styles.recommendationCard}>
+            <View className='flex-1 flex-row gap-4 items-center'>
+              <View>
+                <Ionicons name="call-outline" size={20} color="#BF2F32" />
+              </View>
+              <View className='flex-1'>
+                <Text className="text-white text-lg">Recordatorio de cita</Text>
+                <Text className="text-gray-300 text-sm">Carlos Perez en 2 horas</Text>
+              </View>
+            </View>
+            <View className='items-center'>
+              <Text className='text-lg text-amber-500 font-bold text-center bg-amber-500/20 rounded-full px-4'>85 %</Text>
+              <Text className='uppercase text-xs text-gray-400'>Probabilidad</Text>
+              <Text className='uppercase text-xs text-white'>De venta</Text>
+            </View>
+          </View>
+          <View style={styles.recommendationCard}>
+            <View className='flex-1 flex-row gap-4 items-center'>
+              <View>
+                <Ionicons name="trending-down-outline" size={20} color="#BF2F32" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white text-lg">Ajuste de precio sugerido</Text>
+                <Text className="text-gray-300 text-sm">El precio actual está 10% por encima del mercado</Text>
+              </View>
+            </View>
+            <View className='items-center'>
+              <Text className='text-lg text-amber-500 font-bold text-center bg-amber-500/20 rounded-full px-4'>85 %</Text>
+              <Text className='uppercase text-xs text-gray-400'>Probabilidad</Text>
+              <Text className='uppercase text-xs text-white'>De venta</Text>
+            </View>
+          </View>
+        </View>
+        <View className='flex flex-col gap-4'>
+          <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
+
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -308,4 +381,28 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#FF383C',
   },
+  scheduleCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#FF383C80',
+    backgroundColor: 'rgba(255, 56, 60, 0.1)',
+    display: "flex",
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    padding: 12,
+    marginBottom: 30,
+  },
+  recommendationCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 14,
+    padding: 10,
+    display: "flex",
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "space-between"
+  }
 });
