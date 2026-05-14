@@ -222,7 +222,7 @@ function AppNavigator() {
           </>
         )}
       </Stack.Navigator>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </NavigationContainer>
   );
 }
