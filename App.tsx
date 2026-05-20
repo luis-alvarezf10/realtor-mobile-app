@@ -205,7 +205,7 @@ function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
