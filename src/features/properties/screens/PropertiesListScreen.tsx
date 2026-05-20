@@ -267,7 +267,7 @@ export function PropertiesListScreen({ navigation }: any) {
       start={{ x: 0.9, y: 0 }}
       end={{ x: 0.9, y: 1 }}
       style={styles.container}>
-      <ScreenHeader title="Propiedades" onNotifications={() => navigation.navigate('Notifications')} theme="dark" />
+      <ScreenHeader title="Inventario" onNotifications={() => navigation.navigate('Notifications')} theme="dark" />
       <View className='flex flex-row justify-between items-center p-4 gap-4'>
         <View className='bg-white/20 flex-1' style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#9CA3AF" />

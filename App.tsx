@@ -40,7 +40,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
   const tabBarItems = [
     { routeKey: 'Home', icon: 'home-outline', activeIcon: 'home', label: 'Inicio' },
-    { routeKey: 'Properties', icon: 'albums-outline', activeIcon: 'albums', label: 'Propiedades' },
+    { routeKey: 'Properties', icon: 'albums-outline', activeIcon: 'albums', label: 'Inventario' },
     { routeKey: 'Chat', icon: 'chatbubble-ellipses-outline', activeIcon: 'chatbubble-ellipses', label: 'Hunterito' },
     { routeKey: 'Agenda', icon: 'calendar-outline', activeIcon: 'calendar', label: 'Agenda' },
     { routeKey: 'Profile', icon: 'grid-outline', activeIcon: 'grid', label: 'Menú' },
