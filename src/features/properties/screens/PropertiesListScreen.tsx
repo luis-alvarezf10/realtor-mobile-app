@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { supabase } from '../../../lib/supabase';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type PropertyDetails = {
   area_sqm: number | null;
@@ -180,38 +181,33 @@ export function PropertiesListScreen({ navigation }: any) {
     const offerType = firstRelation(item.type_offers);
     const statusStyle = getStatusStyle(item.status);
 
+    const statusLabel =
+      item.status === 'available' ? 'Disponible' : item.status === 'reserved' ? 'Reservado' : item.status === 'saled' ? 'Vendido' : item.status === 'rented' ? 'Alquilado' : item.status;
+
     return (
       <TouchableOpacity style={styles.gridCard} activeOpacity={0.86} onPress={() => navigation.navigate('PropertyDetail', { property: item })}>
         <View style={styles.gridImageWrap}>
           {item.image ? (
-            <Image source={{ uri: item.image }} style={styles.gridPropertyImage} />
+            <View style={styles.gridImageContainer}>
+              <Image source={{ uri: item.image }} style={styles.gridPropertyImage} resizeMode="cover" />
+            </View>
           ) : (
-            <View style={styles.gridImagePlaceholder}>
-              <Ionicons name="home-outline" size={24} color="#cc2d19" />
+            <View style={styles.gridImageContainer}>
+              <Ionicons name="home-outline" size={28} color="#cc2d19" />
             </View>
           )}
           <View style={[styles.gridStatusPill, { backgroundColor: statusStyle.backgroundColor }]}>
-            <View style={[styles.gridStatusDot, { backgroundColor: statusStyle.color }]} />
-            <Text style={[styles.gridStatusText, { color: statusStyle.color }]}>
-              {item.status === 'available' ? 'Disponible' : item.status === 'reserved' ? 'Reservado' : item.status === 'saled' ? 'Vendido' : item.status === 'rented' ? 'Alquilado' : item.status}
-            </Text>
+            <Text style={styles.gridStatusText}>{statusLabel}</Text>
           </View>
-          {!!details?.price && (
-            <View style={styles.gridPriceBadge}>
-              <Text style={styles.gridPriceText}>
-                {formatPrice(details.price, offerType?.value, details.period)}
-              </Text>
-            </View>
-          )}
         </View>
-
         <View style={styles.gridCardBody}>
-          <Text style={styles.gridPropertyTitle} numberOfLines={1}>
+          <Text style={styles.gridPropertyTitle} numberOfLines={2}>
             {item.title}
           </Text>
+
           {!!item.address && (
             <View style={styles.gridAddressRow}>
-              <Ionicons name="location" size={11} color="#9CA3AF" />
+              <Ionicons name="location" size={12} color="#9CA3AF" />
               <Text style={styles.gridPropertyAddress} numberOfLines={1}>
                 {item.address}
               </Text>
@@ -221,61 +217,82 @@ export function PropertiesListScreen({ navigation }: any) {
           <View style={styles.gridSpecsRow}>
             {details?.bedrooms ? (
               <View style={styles.gridSpecItem}>
-                <Ionicons name="bed-outline" size={12} color="#9CA3AF" />
+                <Ionicons name="bed-outline" size={14} color="#9CA3AF" />
                 <Text style={styles.gridSpecText}>{details.bedrooms}</Text>
               </View>
             ) : null}
             {details?.bathrooms ? (
-              <View style={styles.gridSpecItem}>
-                <Ionicons name="water-outline" size={12} color="#9CA3AF" />
-                <Text style={styles.gridSpecText}>{details.bathrooms}</Text>
-              </View>
+              <>
+                <Text style={styles.gridSpecSep}>|</Text>
+                <View style={styles.gridSpecItem}>
+                  <Ionicons name="water-outline" size={14} color="#9CA3AF" />
+                  <Text style={styles.gridSpecText}>{details.bathrooms}</Text>
+                </View>
+              </>
             ) : null}
-            {details?.parking_spots ? (
-              <View style={styles.gridSpecItem}>
-                <Ionicons name="car-outline" size={12} color="#9CA3AF" />
-                <Text style={styles.gridSpecText}>{details.parking_spots}</Text>
-              </View>
-            ) : null}
+            {!!details?.area_sqm && (
+              <>
+                <Text style={styles.gridSpecSep}>|</Text>
+                <View style={styles.gridSpecItem}>
+                  <Ionicons name="expand-outline" size={14} color="#9CA3AF" />
+                  <Text style={styles.gridSpecText}>{details.area_sqm} m²</Text>
+                </View>
+              </>
+            )}
           </View>
-
-          {!!propertyType?.value && (
-            <View style={styles.gridTypeRow}>
+          <View style={styles.gridBadgesRow}>
+            {!!propertyType?.value && (
               <View style={[styles.gridTypeBadge, propertyType.color ? { backgroundColor: `${propertyType.color}18` } : null]}>
                 <Text style={[styles.gridTypeText, propertyType.color ? { color: propertyType.color } : null]}>
                   {propertyType.value}
                 </Text>
               </View>
-            </View>
-          )}
+            )}
+            {!!details?.price && (
+              <View style={styles.gridPriceBadge}>
+                <Text style={styles.gridPriceText}>
+                  {formatPrice(details.price, offerType?.value, details.period)}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <ScreenHeader title="Propiedades" onNotifications={() => navigation.navigate('Notifications')} />
-
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="#9CA3AF" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar por título o dirección"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor="#9CA3AF"
-        />
-        {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-        ) : null}
+    <LinearGradient
+      colors={['#5A0001', '#000000']}
+      start={{ x: 0.9, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
+      style={styles.container}>
+      <ScreenHeader title="Propiedades" onNotifications={() => navigation.navigate('Notifications')} theme="dark" />
+      <View className='flex flex-row justify-between items-center p-4 gap-4'>
+        <View className='bg-white/20 flex-1' style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#9CA3AF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar inmuebles..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#9CA3AF"
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
         <TouchableOpacity
           style={[styles.filterButton, hasActiveFilters && styles.filterButtonActive]}
           onPress={() => setShowFilters(true)}
         >
-          <Ionicons name="options" size={18} color={hasActiveFilters ? '#fff' : '#6B7280'} />
+          {hasActiveFilters ? (
+            <Ionicons name="funnel" size={18} color='#fff' />
+          ) : (
+            <Ionicons name="funnel-outline" size={18} color='#fff' />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -304,10 +321,7 @@ export function PropertiesListScreen({ navigation }: any) {
         <FlatList
           data={filteredProperties}
           keyExtractor={(item) => item.id}
-          numColumns={2}
           renderItem={renderPropertyGrid}
-          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-          columnWrapperStyle={styles.gridRow}
           contentContainerStyle={[
             styles.listContent,
             filteredProperties.length === 0 && styles.emptyListContent,
@@ -440,7 +454,7 @@ export function PropertiesListScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -478,11 +492,11 @@ function getStatusStyle(status: string) {
   const normalized = normalizeStatus(status);
 
   if (normalized === 'available') {
-    return { color: '#047857', backgroundColor: '#ECFDF5' };
+    return { backgroundColor: '#34C759' };
   }
 
   if (normalized === 'reserved') {
-    return { color: '#B45309', backgroundColor: '#FFFBEB' };
+    return { backgroundColor: '#FF8D28' };
   }
 
   if (normalized === 'saled') {
@@ -508,24 +522,6 @@ function formatPrice(price?: number | null, offerTypeValue?: string | null, peri
   const periodMap: Record<string, string> = { monthly: 'mes', yearly: 'año', weekly: 'semana', daily: 'día' };
   const periodLabel = period ? (periodMap[period.toLowerCase()] || period) : null;
   return periodLabel ? `${formatted} / ${periodLabel}` : formatted;
-}
-
-function formatArea(area?: number | null) {
-  return area ? `${Math.round(area)} m2` : 'N/D';
-}
-
-function formatNumber(value: number | null | undefined, suffix: string) {
-  return value ? `${value} ${suffix}` : 'N/D';
-}
-
-function formatBathrooms(bathrooms?: number | null, halfBath?: number | null) {
-  if (!bathrooms && !halfBath) {
-    return 'N/D';
-  }
-
-  const full = bathrooms || 0;
-  const half = halfBath ? ` + ${halfBath}/2` : '';
-  return `${full}${half} banos`;
 }
 
 const styles = StyleSheet.create({
@@ -600,46 +596,41 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#fff',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     gap: 10,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)'
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#111827',
+    color: '#fff',
   },
   clearButton: {
     padding: 4,
   },
   filterButton: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     borderRadius: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#BF2F32',
     alignItems: 'center',
     justifyContent: 'center',
   },
   filterButtonActive: {
     backgroundColor: '#cc2d19',
   },
-  gridRow: {
-    gap: 12,
-  },
   gridCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -647,24 +638,23 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   gridImageWrap: {
-    height: 130,
-    backgroundColor: '#F3F4F6',
+    width: 140,
+    height: 140,
     position: 'relative',
   },
-  gridPropertyImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gridImagePlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  gridImageContainer: {
+    width: 140,
+    height: 140,
     backgroundColor: '#FEF2F2',
+  },
+  gridPropertyImage: {
+    width: 140,
+    height: 140,
   },
   gridStatusPill: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    left: 8,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 999,
@@ -672,23 +662,18 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     gap: 4,
   },
-  gridStatusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
   gridStatusText: {
     fontSize: 10,
     fontWeight: '700',
+    color: "#fff"
   },
   gridPriceBadge: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 'auto',
   },
   gridPriceText: {
     fontSize: 12,
@@ -696,19 +681,20 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   gridCardBody: {
-    padding: 10,
+    flex: 1,
+    padding: 12,
   },
   gridPropertyTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
     lineHeight: 18,
+    flex: 1,
   },
   gridAddressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 4,
   },
   gridPropertyAddress: {
     flex: 1,
@@ -717,29 +703,40 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   gridSpecsRow: {
+    display: 'flex',
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     marginTop: 8,
   },
   gridSpecItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
+  },
+  gridSpecSep: {
+    fontSize: 14,
+    fontWeight: '300',
+    color: '#9CA3AF',
   },
   gridSpecText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: '#6B7280',
-  },
-  gridTypeRow: {
-    marginTop: 8,
   },
   gridTypeBadge: {
     borderRadius: 999,
     backgroundColor: '#FEE2E2',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    alignSelf: 'flex-start',
+    flexShrink: 1,
+  },
+  gridBadgesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
   },
   gridTypeText: {
     color: '#7F1D1D',
