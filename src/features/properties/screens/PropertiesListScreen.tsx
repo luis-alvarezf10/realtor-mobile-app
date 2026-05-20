@@ -296,6 +296,38 @@ export function PropertiesListScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.pillsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsContent}>
+          {([
+            { key: '', label: 'Todas' },
+            { key: 'available', label: 'Disponibles' },
+            { key: 'reserved', label: 'Reservadas' },
+            { key: 'rented', label: 'Alquiladas' },
+            { key: 'saled', label: 'Vendidas' },
+          ] as const).map((tab) => {
+            const isActive = filterStatus === tab.key;
+            return (
+              <TouchableOpacity key={tab.key} activeOpacity={0.8} onPress={() => setFilterStatus(tab.key)}>
+                {isActive ? (
+                  <LinearGradient
+                    colors={['#cc2d19', '#8B1A1A']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[styles.pill, styles.pillActive]}
+                  >
+                    <Text style={[styles.pillText, styles.pillTextActive]}>{tab.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>{tab.label}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
       {hasActiveFilters && (
         <View style={styles.activeFiltersBar}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -304,7 +336,7 @@ export function PropertiesListScreen({ navigation }: any) {
             {filterBathrooms && <FilterChip label={`${filterBathrooms}+ baños`} onRemove={() => setFilterBathrooms('')} />}
             {filterHalfBaths && <FilterChip label={`${filterHalfBaths}+ ½ baño`} onRemove={() => setFilterHalfBaths('')} />}
             {filterParking && <FilterChip label={`${filterParking}+ est`} onRemove={() => setFilterParking('')} />}
-            {filterStatus && <FilterChip label={filterStatus} onRemove={() => setFilterStatus('')} />}
+            {filterStatus && <FilterChip label={filterStatus === 'available' ? 'Disponible' : filterStatus === 'reserved' ? 'Reservado' : filterStatus === 'saled' ? 'Vendido' : filterStatus === 'rented' ? 'Alquilado' : filterStatus} onRemove={() => setFilterStatus('')} />}
             <TouchableOpacity style={styles.clearAllButton} onPress={clearFilters}>
               <Text style={styles.clearAllText}>Limpiar todo</Text>
             </TouchableOpacity>
@@ -332,15 +364,15 @@ export function PropertiesListScreen({ navigation }: any) {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="business-outline" size={30} color="#cc2d19" />
+                <Ionicons name="albums-outline" size={30} color="#cc2d19" />
               </View>
               <Text style={styles.emptyTitle}>
-                {hasActiveFilters ? 'Sin resultados' : (error || 'Aun no tienes propiedades')}
+                {hasActiveFilters ? 'Sin resultados' : (error || 'Sin inventario ')}
               </Text>
               <Text style={styles.emptyDescription}>
                 {hasActiveFilters
-                  ? 'Intenta ajustar los filtros de búsqueda'
-                  : 'Cuando agregues propiedades asociadas a tu agente, apareceran aqui.'}
+                  ? 'No se encontraron resultados con estos filrtos de busqueda.'
+                  : 'Aún no has agregado un inmueble. Crea un nuevo registro para administrar tu inventario.'}
               </Text>
             </View>
           }
@@ -461,8 +493,12 @@ export function PropertiesListScreen({ navigation }: any) {
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <TouchableOpacity style={styles.filterChip} onPress={onRemove}>
+      <LinearGradient
+        colors={['#FF383C80', '#99222480']}
+        style={StyleSheet.absoluteFill}
+      />
       <Text style={styles.filterChipText}>{label}</Text>
-      <Ionicons name="close" size={14} color="#6B7280" />
+      <Ionicons name="close" size={14} color="#FF383C" />
     </TouchableOpacity>
   );
 }
@@ -574,15 +610,15 @@ const styles = StyleSheet.create({
     width: 66,
     height: 66,
     borderRadius: 33,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#99222440',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
   },
   emptyTitle: {
-    color: '#111827',
+    color: '#fff',
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     textAlign: 'center',
   },
   emptyDescription: {
@@ -746,26 +782,54 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
   },
+  pillsContainer: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 8
+  },
+  pillsContent: {
+    gap: 8,
+  },
+  pill: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  pillActive: {
+    borderColor: '#cc2d19',
+  },
+  pillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  pillTextActive: {
+    color: '#fff',
+  },
   activeFiltersBar: {
     marginTop: 12,
     paddingHorizontal: 16,
+    paddingBottom: 8
   },
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#fff',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#FF383C80',
+    overflow: 'hidden',
   },
   filterChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6B7280',
+    color: "#fff"
   },
   clearAllButton: {
     alignItems: 'center',
