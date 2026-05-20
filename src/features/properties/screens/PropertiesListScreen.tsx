@@ -371,9 +371,12 @@ export function PropertiesListScreen({ navigation }: any) {
               </Text>
               <Text style={styles.emptyDescription}>
                 {hasActiveFilters
-                  ? 'No se encontraron resultados con estos filrtos de busqueda.'
+                  ? 'No se encontraron resultados con estos filtros de busqueda.'
                   : 'Aún no has agregado un inmueble. Crea un nuevo registro para administrar tu inventario.'}
               </Text>
+              <TouchableOpacity style={styles.emptyActionButton} onPress={clearFilters}>
+                <Text style={styles.emptyActionText}>{hasActiveFilters ? 'Limpiar Filtros' : 'Agregar Propiedad' }</Text>
+              </TouchableOpacity>
             </View>
           }
           showsVerticalScrollIndicator={false}
@@ -383,106 +386,180 @@ export function PropertiesListScreen({ navigation }: any) {
       <Modal visible={showFilters} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            <LinearGradient
+              colors={['#1A1A2E', '#0D0D0D']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.modalGradient}
+            >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filtrar propiedades</Text>
               <TouchableOpacity onPress={() => setShowFilters(false)} style={styles.modalClose}>
-                <Ionicons name="close" size={24} color="#111827" />
+                <Ionicons name="close" size={24} color="#fff" />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               <FilterSection title="Estado">
                 <View style={styles.chipRow}>
-                  {['available', 'reserved', 'saled', 'rented'].map((status) => (
-                    <TouchableOpacity
-                      key={status}
-                      style={[styles.chip, filterStatus === status && styles.chipActive]}
-                      onPress={() => setFilterStatus(filterStatus === status ? '' : status)}
-                    >
-                      <Text style={[styles.chipText, filterStatus === status && styles.chipTextActive]}>
-                        {status === 'available' ? 'Disponible' : status === 'reserved' ? 'Reservado' : status === 'saled' ? 'Vendido' : 'Alquilado'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['available', 'reserved', 'saled', 'rented'].map((status) => {
+                    const isActive = filterStatus === status;
+                    return (
+                      <TouchableOpacity
+                        key={status}
+                        style={[styles.chip, isActive && styles.chipActive]}
+                        onPress={() => setFilterStatus(isActive ? '' : status)}
+                      >
+                        {isActive && (
+                          <LinearGradient
+                            colors={['#cc2d19', '#8B1A1A']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={StyleSheet.absoluteFill}
+                          />
+                        )}
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                          {status === 'available' ? 'Disponible' : status === 'reserved' ? 'Reservado' : status === 'saled' ? 'Vendido' : 'Alquilado'}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </FilterSection>
 
               <FilterSection title="Habitaciones mínimas">
                 <View style={styles.chipRow}>
-                  {['1', '2', '3', '4', '5'].map((num) => (
-                    <TouchableOpacity
-                      key={num}
-                      style={[styles.chip, filterBedrooms === num && styles.chipActive]}
-                      onPress={() => setFilterBedrooms(filterBedrooms === num ? '' : num)}
-                    >
-                      <Text style={[styles.chipText, filterBedrooms === num && styles.chipTextActive]}>
-                        {num}+
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['1', '2', '3', '4', '5'].map((num) => {
+                    const isActive = filterBedrooms === num;
+                    return (
+                      <TouchableOpacity
+                        key={num}
+                        style={[styles.chip, isActive && styles.chipActive]}
+                        onPress={() => setFilterBedrooms(isActive ? '' : num)}
+                      >
+                        {isActive && (
+                          <LinearGradient
+                            colors={['#cc2d19', '#8B1A1A']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={StyleSheet.absoluteFill}
+                          />
+                        )}
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                          {num}+
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </FilterSection>
 
               <FilterSection title="Baños completos mínimos">
                 <View style={styles.chipRow}>
-                  {['1', '2', '3', '4'].map((num) => (
-                    <TouchableOpacity
-                      key={num}
-                      style={[styles.chip, filterBathrooms === num && styles.chipActive]}
-                      onPress={() => setFilterBathrooms(filterBathrooms === num ? '' : num)}
-                    >
-                      <Text style={[styles.chipText, filterBathrooms === num && styles.chipTextActive]}>
-                        {num}+
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['1', '2', '3', '4'].map((num) => {
+                    const isActive = filterBathrooms === num;
+                    return (
+                      <TouchableOpacity
+                        key={num}
+                        style={[styles.chip, isActive && styles.chipActive]}
+                        onPress={() => setFilterBathrooms(isActive ? '' : num)}
+                      >
+                        {isActive && (
+                          <LinearGradient
+                            colors={['#cc2d19', '#8B1A1A']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={StyleSheet.absoluteFill}
+                          />
+                        )}
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                          {num}+
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </FilterSection>
 
               <FilterSection title="Medios baños mínimos">
                 <View style={styles.chipRow}>
-                  {['1', '2', '3'].map((num) => (
-                    <TouchableOpacity
-                      key={num}
-                      style={[styles.chip, filterHalfBaths === num && styles.chipActive]}
-                      onPress={() => setFilterHalfBaths(filterHalfBaths === num ? '' : num)}
-                    >
-                      <Text style={[styles.chipText, filterHalfBaths === num && styles.chipTextActive]}>
-                        {num}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['1', '2', '3'].map((num) => {
+                    const isActive = filterHalfBaths === num;
+                    return (
+                      <TouchableOpacity
+                        key={num}
+                        style={[styles.chip, isActive && styles.chipActive]}
+                        onPress={() => setFilterHalfBaths(isActive ? '' : num)}
+                      >
+                        {isActive && (
+                          <LinearGradient
+                            colors={['#cc2d19', '#8B1A1A']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={StyleSheet.absoluteFill}
+                          />
+                        )}
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                          {num}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </FilterSection>
 
               <FilterSection title="Estacionamientos mínimos">
                 <View style={styles.chipRow}>
-                  {['1', '2', '3', '4'].map((num) => (
-                    <TouchableOpacity
-                      key={num}
-                      style={[styles.chip, filterParking === num && styles.chipActive]}
-                      onPress={() => setFilterParking(filterParking === num ? '' : num)}
-                    >
-                      <Text style={[styles.chipText, filterParking === num && styles.chipTextActive]}>
-                        {num}+
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['1', '2', '3', '4'].map((num) => {
+                    const isActive = filterParking === num;
+                    return (
+                      <TouchableOpacity
+                        key={num}
+                        style={[styles.chip, isActive && styles.chipActive]}
+                        onPress={() => setFilterParking(isActive ? '' : num)}
+                      >
+                        {isActive && (
+                          <LinearGradient
+                            colors={['#cc2d19', '#8B1A1A']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={StyleSheet.absoluteFill}
+                          />
+                        )}
+                        <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                          {num}+
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </FilterSection>
             </ScrollView>
 
             <View style={styles.modalFooter}>
               <TouchableOpacity style={styles.modalClearButton} onPress={clearFilters}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.02)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
                 <Text style={styles.modalClearText}>Limpiar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalApplyButton}
                 onPress={() => setShowFilters(false)}
               >
+                <LinearGradient
+                  colors={['#cc2d19', '#8B1A1A']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFill}
+                />
                 <Text style={styles.modalApplyText}>Aplicar filtros</Text>
               </TouchableOpacity>
             </View>
+            </LinearGradient>
           </View>
         </View>
       </Modal>
@@ -848,10 +925,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
+    overflow: 'hidden',
+  },
+  modalGradient: {
     paddingBottom: 20,
   },
   modalHeader: {
@@ -862,12 +941,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
   },
   modalClose: {
     padding: 4,
@@ -882,7 +961,7 @@ const styles = StyleSheet.create({
   filterSectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#D1D5DB',
     marginBottom: 10,
   },
   chipRow: {
@@ -894,15 +973,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
   },
   chipActive: {
-    backgroundColor: '#cc2d19',
+    backgroundColor: 'transparent',
   },
   chipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: '#D1D5DB',
   },
   chipTextActive: {
     color: '#fff',
@@ -917,24 +997,40 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   modalClearText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#374151',
+    color: '#D1D5DB',
   },
   modalApplyButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: '#cc2d19',
+    backgroundColor: 'transparent',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   modalApplyText: {
     fontSize: 15,
     fontWeight: '700',
     color: '#fff',
   },
+  emptyActionButton: {
+    backgroundColor: '#BF2F32',
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  emptyActionText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  }
 });
