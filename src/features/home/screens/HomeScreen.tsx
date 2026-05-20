@@ -196,6 +196,12 @@ export function HomeScreen({ navigation }: any) {
 
         </View>
       </ScrollView>
+      <LinearGradient
+        colors={['transparent', '#000000']}
+        locations={[0, 0.7]}
+        style={styles.bottomFade}
+        pointerEvents="none"
+      />
     </LinearGradient>
   );
 }
@@ -404,5 +410,12 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: "center",
     justifyContent: "space-between"
-  }
+  },
+  bottomFade: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+  },
 });

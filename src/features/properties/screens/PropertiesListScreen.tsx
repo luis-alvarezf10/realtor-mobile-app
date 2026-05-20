@@ -383,6 +383,12 @@ export function PropertiesListScreen({ navigation }: any) {
         />
       )}
 
+      <LinearGradient
+        colors={['transparent', '#000000']}
+        locations={[0, 0.7]}
+        style={styles.bottomFade}
+        pointerEvents="none"
+      />
       <Modal visible={showFilters} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -1032,5 +1038,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '700',
-  }
+  },
+  bottomFade: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+  },
 });
