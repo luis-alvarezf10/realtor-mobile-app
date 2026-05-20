@@ -641,15 +641,18 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     position: 'relative',
+    borderRadius: 12
   },
   gridImageContainer: {
     width: 140,
     height: 140,
     backgroundColor: '#FEF2F2',
+    borderRadius: 12
   },
   gridPropertyImage: {
     width: 140,
     height: 140,
+    borderRadius: 12
   },
   gridStatusPill: {
     position: 'absolute',
