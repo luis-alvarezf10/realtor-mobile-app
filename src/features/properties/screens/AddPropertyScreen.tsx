@@ -40,6 +40,13 @@ function haversineDistance(lat1: number, lon1: number, lat2: number | null, lon2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+const PERIOD_TO_MONTHLY: Record<string, number> = {
+  monthly: 1,
+  yearly: 1 / 12,
+  weekly: 52 / 12,
+  daily: 365 / 12,
+};
+
 const PERIOD_OPTIONS = [
   { value: 'monthly', label: 'Mensual' },
   { value: 'yearly', label: 'Anual' },
@@ -366,7 +373,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
           latitude,
           longitude,
           type_properties(id, value, color),
-          details_properties!inner(price, lot_size, area_sqm, is_furnished, is_built)
+          details_properties!inner(price, lot_size, area_sqm, is_furnished, is_built, period)
         `)
         .eq('id_type_offer', selectedOfferId)
         .eq('details_properties.is_built', isBuilt)
@@ -403,10 +410,17 @@ export function AddPropertyScreen({ navigation, route }: any) {
         const dp = firstRelation(e.details_properties);
         const tp = firstRelation(e.type_properties);
         if (!dp) continue;
-        const p = Number(dp.price);
+        let p = Number(dp.price);
         const lot = Number(dp.lot_size);
         const area = Number(dp.area_sqm);
         const metric = lot > 0 ? lot : (area > 0 ? area : 0);
+
+        const comparablePeriod = dp.period?.toLowerCase();
+        const targetPeriod = period;
+        if (comparablePeriod && targetPeriod &&
+            comparablePeriod in PERIOD_TO_MONTHLY && targetPeriod in PERIOD_TO_MONTHLY) {
+          p = p * (PERIOD_TO_MONTHLY[comparablePeriod] / PERIOD_TO_MONTHLY[targetPeriod]);
+        }
 
         if (p > 0 && metric > 0) {
           const unitPrice = p / metric;
@@ -634,10 +648,12 @@ export function AddPropertyScreen({ navigation, route }: any) {
 
       {selectedClientId ? (
         <View style={styles.clientSelected}>
-          <Ionicons name="person-circle-outline" size={36} color="#10B981" />
+          <View className='bg-emerald-500/20 p-5 rounded-full'>
+            <Ionicons name="person-outline" size={36} color="#10B981" />
+          </View>
           <Text style={styles.clientSelectedName}>{selectedClientName}</Text>
-          <TouchableOpacity style={styles.clientChangeButton} onPress={clearSelectedClient}>
-            <Ionicons name="close-circle" size={18} color="#D1D5DB" />
+          <TouchableOpacity style={styles.clientChangeButton} onPress={clearSelectedClient} className='bg-red-500 py-2 px-5 rounded-full'>
+            <Ionicons name="close-outline" size={18} color="#fff" />
             <Text style={styles.clientChangeText}>Cambiar cliente</Text>
           </TouchableOpacity>
         </View>
@@ -673,7 +689,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
                     </Text>
                     <Text style={styles.clientResultCedula}>C.I. {c.national_id}</Text>
                   </View>
-                  <Ionicons name="add-circle" size={22} color="#cc2d19" />
+                  <Ionicons name="add-circle-outline" size={22} color="#cc2d19" />
                 </TouchableOpacity>
               ))}
             </View>
@@ -987,7 +1003,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
         {recommending ? (
           <ActivityIndicator size="small" color="#cc2d19" />
         ) : (
-          <Ionicons name="sparkles" size={18} color="#cc2d19" />
+          <Ionicons name="sparkles-outline" size={18} color="#cc2d19" />
         )}
         <Text style={styles.recommendButtonText}>
           {recommending ? 'Calculando...' : avgPricePerSqm ? 'Recalcular recomendación' : 'Recomendar precio'}
@@ -1225,9 +1241,10 @@ const styles = StyleSheet.create({
   toggle: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12,
     paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)', 
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)'
   },
-  toggleActive: { backgroundColor: 'rgba(16, 185, 129, 0.1)' },
+  toggleActive: { backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' },
   toggleText: { fontSize: 14, fontWeight: '500', color: '#9CA3AF' },
 
   recommendButton: {
@@ -1263,17 +1280,18 @@ const styles = StyleSheet.create({
   clientSelected: { alignItems: 'center', gap: 6, paddingVertical: 12 },
   clientSelectedName: { fontSize: 16, fontWeight: '700', color: '#10B981' },
   clientChangeButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  clientChangeText: { fontSize: 13, color: '#D1D5DB' },
+  clientChangeText: { fontSize: 13, color: '#fff', fontWeight: '600' },
   searchRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   searchButton: {
     backgroundColor: '#cc2d19', borderRadius: 12, padding: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  noResultText: { fontSize: 13, color: '#9CA3AF', textAlign: 'center', marginTop: 8 },
+  noResultText: { fontSize: 13, color: '#ff0000ff', textAlign: 'center', marginTop: 8, fontWeight: '500' },
   searchResults: { marginTop: 8, gap: 6 },
   clientResultRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     padding: 12, backgroundColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 12,
+    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   clientResultName: { fontSize: 14, fontWeight: '600', color: '#fff' },
   clientResultCedula: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
