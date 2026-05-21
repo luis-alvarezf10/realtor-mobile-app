@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import ViewShot from 'react-native-view-shot';
 import * as Location from 'expo-location';
@@ -24,22 +24,25 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
 
 const mapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#f5f0eb' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#4a4a4a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f0eb' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e8e0d8' }] },
+  { elementType: 'geometry', stylers: [{ color: '#2d1517' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#D1D5DB' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0a0a' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#3d1c1f' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#4d2428' }] },
   { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#cc2d19' }] },
-  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#f0ebe5' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
-  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#d9d0c6' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#d4dce4' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#6b7b8b' }] },
-  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6b7b8b' }] },
-  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#e8e0d8' }] },
-  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#d9d0c6' }] },
-  { featureType: 'administrative', elementType: 'labels.text.fill', stylers: [{ color: '#4a4a4a' }] },
+  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#451e22' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#4d2125' }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#5a282c' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#141010' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#6B7280' }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#2a1214' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6B7280' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2a1214' }] },
+  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#3d1c1f' }] },
+  { featureType: 'administrative', elementType: 'labels.text.fill', stylers: [{ color: '#9CA3AF' }] },
+  { featureType: 'administrative.country', elementType: 'labels.text.fill', stylers: [{ color: '#F3F4F6' }] },
+  { featureType: 'road.local', elementType: 'labels.text.fill', stylers: [{ color: '#E5E7EB' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#231515' }] },
 ];
 
 type Property = {
@@ -85,6 +88,8 @@ export function PropertyDetailScreen({ route, navigation }: any) {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
+  const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
 
   const details = useMemo(() => {
     if (Array.isArray(property.details_properties)) {
@@ -293,10 +298,23 @@ export function PropertyDetailScreen({ route, navigation }: any) {
       <Modal visible={showDirections} animationType="slide" presentationStyle="fullScreen">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowDirections(false)} style={styles.modalBack}>
-              <Ionicons name="arrow-back" size={24} color="#111827" />
+            <TouchableOpacity onPress={() => { setShowDirections(false); setRouteCoords([]); setRouteInfo(null); }} style={styles.modalBack}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Cómo llegar</Text>
+            <View style={styles.modalCenter}>
+              <Text style={styles.modalTitle}>Cómo llegar</Text>
+              {routeInfo && (
+                <Text style={styles.modalSubtitle}>
+                  {routeInfo.distance < 1
+                    ? `${Math.round(routeInfo.distance * 1000)} m`
+                    : `${routeInfo.distance.toFixed(1)} km`}
+                  {' · '}
+                  {routeInfo.duration >= 60
+                    ? `${Math.floor(routeInfo.duration / 60)}h ${Math.round(routeInfo.duration % 60)}min`
+                    : `${Math.round(routeInfo.duration)} min`}
+                </Text>
+              )}
+            </View>
             <View style={{ width: 32 }} />
           </View>
           <MapView
@@ -312,7 +330,7 @@ export function PropertyDetailScreen({ route, navigation }: any) {
               <Marker
                 coordinate={userLocation}
                 title="Tu ubicación"
-                pinColor="#3B82F6"
+                pinColor="#cc2d19"
               />
             )}
             <Marker
@@ -327,15 +345,26 @@ export function PropertyDetailScreen({ route, navigation }: any) {
                 apikey={GOOGLE_MAPS_APIKEY}
                 strokeWidth={4}
                 strokeColor="#cc2d19"
+                strokeColors={['#cc2d19']}
                 mode="DRIVING"
                 precision="high"
                 onReady={(result) => {
                   if (result?.coordinates) {
+                    setRouteCoords(result.coordinates);
+                    setRouteInfo({ distance: result.distance, duration: result.duration });
                     mapRef.current?.fitToCoordinates(result.coordinates, {
                       edgePadding: { top: 80, right: 80, bottom: 80, left: 80 },
                     });
                   }
                 }}
+              />
+            )}
+            {routeCoords.length > 0 && (
+              <Polyline
+                coordinates={routeCoords}
+                strokeColor="#cc2d19"
+                strokeColors={['#cc2d19']}
+                strokeWidth={4}
               />
             )}
           </MapView>
@@ -572,10 +601,18 @@ const styles = StyleSheet.create({
   modalBack: {
     padding: 4,
   },
+  modalCenter: {
+    alignItems: 'center',
+  },
   modalTitle: {
     fontSize: 17,
     fontWeight: '600',
     color: '#fff',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 2,
   },
   fullMap: {
     flex: 1,
