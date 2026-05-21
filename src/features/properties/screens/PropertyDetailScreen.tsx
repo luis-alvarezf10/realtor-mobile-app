@@ -45,6 +45,7 @@ type Property = {
     half_bath: number | null;
     price: number | null;
     is_furnished: boolean | null;
+    is_built: boolean | null;
     period: string | null;
   } | {
     area_sqm: number | null;
@@ -55,9 +56,10 @@ type Property = {
     half_bath: number | null;
     price: number | null;
     is_furnished: boolean | null;
+    is_built: boolean | null;
     period: string | null;
   }[] | null;
-  type_offers: { value: string } | { value: string }[] | null;
+  type_offers: { name: string; value: string } | { name: string; value: string }[] | null;
 };
 
 export function PropertyDetailScreen({ route, navigation }: any) {
@@ -174,6 +176,38 @@ export function PropertyDetailScreen({ route, navigation }: any) {
           {!!property.description && (
             <Text style={styles.description}>{property.description}</Text>
           )}
+          {!!propertyType?.value && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.sectionTitle}>Clasificación</Text>
+              <View style={styles.badgesRow}>
+                <View style={[styles.typeBadge, propertyType.color ? { backgroundColor: `${propertyType.color}18` } : null]}>
+                  <Text style={[styles.typeText, propertyType.color ? { color: propertyType.color } : null]}>
+                    {propertyType.value}
+                  </Text>
+                </View>
+                {!!offerType?.name && (
+                  <View style={styles.offerBadge}>
+                    <Text style={styles.offerBadgeText}>{offerType.name}</Text>
+                  </View>
+                )}
+                {details && (
+                  <>
+                    <View style={[styles.statusBadge, details.is_built ? styles.statusBadgeGreen : styles.statusBadgeGray]}>
+                      <Text style={[styles.statusBadgeText, { color: details.is_built ? '#10B981' : '#9CA3AF' }]}>
+                        {details.is_built ? 'Construido' : 'No construido'}
+                      </Text>
+                    </View>
+                    <View style={[styles.statusBadge, details.is_furnished ? styles.statusBadgeGreen : styles.statusBadgeGray]}>
+                      <Text style={[styles.statusBadgeText, { color: details.is_furnished ? '#10B981' : '#9CA3AF' }]}>
+                        {details.is_furnished ? 'Amoblado' : 'Sin amoblar'}
+                      </Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
+          )}
 
           {details && (
             <>
@@ -195,21 +229,6 @@ export function PropertyDetailScreen({ route, navigation }: any) {
                 {details.lot_size && (
                   <DetailItem icon="cube-outline" label={formatArea(details.lot_size)} />
                 )}
-                {details.is_furnished && (
-                  <DetailItem icon="checkmark-circle" label="Amoblado" />
-                )}
-              </View>
-            </>
-          )}
-
-          {!!propertyType?.value && (
-            <>
-              <View style={styles.divider} />
-              <Text style={styles.sectionTitle}>Tipo de propiedad</Text>
-              <View style={[styles.typeBadge, propertyType.color ? { backgroundColor: `${propertyType.color}18` } : null]}>
-                <Text style={[styles.typeText, propertyType.color ? { color: propertyType.color } : null]}>
-                  {propertyType.value}
-                </Text>
               </View>
             </>
           )}
@@ -365,11 +384,11 @@ function FlyerDetail({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DetailItem({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+function DetailItem({ icon, label, color }: { icon: keyof typeof Ionicons.glyphMap; label: string; color?: string }) {
   return (
     <View style={styles.detailItem}>
-      <Ionicons name={icon} size={18} color="#cc2d19" />
-      <Text style={styles.detailItemText}>{label}</Text>
+      <Ionicons name={icon} size={18} color={color || '#9CA3AF'} />
+      <Text style={[styles.detailItemText, color ? { color } : null]}>{label}</Text>
     </View>
   );
 }
@@ -447,6 +466,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 6,
     gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.30)',
   },
   statusText: {
     fontSize: 13,
@@ -523,12 +544,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#E5E7EB',
   },
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
   typeBadge: {
     borderRadius: 999,
     backgroundColor: 'rgba(255, 255, 255, 0.10)',
     paddingHorizontal: 14,
     paddingVertical: 8,
-    alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
   },
@@ -536,6 +561,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#fff',
+  },
+  offerBadge: {
+    borderRadius: 999,
+    backgroundColor: 'rgba(204, 45, 25, 0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(204, 45, 25, 0.3)',
+  },
+  offerBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#cc2d19',
+  },
+  statusBadgeGreen: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  statusBadgeGray: {
+    backgroundColor: 'rgba(156, 163, 175, 0.1)',
+    borderColor: 'rgba(156, 163, 175, 0.2)',
+  },
+  statusBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   mapContainer: {
     borderRadius: 16,

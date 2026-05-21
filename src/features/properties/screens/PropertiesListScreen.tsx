@@ -102,9 +102,11 @@ export function PropertiesListScreen({ navigation }: any) {
           half_bath,
           price,
           is_furnished,
+          is_built,
           period
         ),
         type_offers (
+          name,
           value
         )
       `)
