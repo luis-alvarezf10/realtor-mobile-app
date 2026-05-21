@@ -20,6 +20,7 @@ import { RegisterScreen } from './src/features/auth/screens/RegisterScreen';
 import { HomeScreen } from './src/features/home/screens/HomeScreen';
 import { PropertiesListScreen } from './src/features/properties/screens/PropertiesListScreen';
 import { PropertyDetailScreen } from './src/features/properties/screens/PropertyDetailScreen';
+import { AddPropertyScreen } from './src/features/properties/screens/AddPropertyScreen';
 import { AgendaScreen } from './src/features/agenda/screens/AgendaScreen';
 import { AllAppointmentsScreen } from './src/features/agenda/screens/AllAppointmentsScreen';
 import { MenuScreen } from './src/features/menu/screens/MenuScreen';
@@ -125,7 +126,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       <AddMenu
         visible={addMenuVisible}
         onClose={() => setAddMenuVisible(false)}
-        onAddProperty={() => console.log('Agregar propiedad')}
+        onAddProperty={() => navigation.navigate('AddProperty')}
         onAddAppointment={() => console.log('Agregar cita')}
         onAddOfferStatus={() => console.log('Agregar status de oferta')}
         onUseAI={() => navigation.getParent()?.navigate('Chat')}
@@ -255,6 +256,7 @@ function AppNavigator() {
             <Stack.Screen name="AllAppointments" component={AllAppointmentsScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
             <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
+            <Stack.Screen name="AddProperty" component={AddPropertyScreen} />
           </>
         ) : (
           <>

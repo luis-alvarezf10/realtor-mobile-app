@@ -23,27 +23,7 @@ import { GradientBackground } from '../../../shared/components/GradientBackgroun
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
 
-const mapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#2d1517' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#D1D5DB' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0a0a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#3d1c1f' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#4d2428' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#cc2d19' }] },
-  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#451e22' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#4d2125' }] },
-  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#5a282c' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#141010' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#6B7280' }] },
-  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#2a1214' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6B7280' }] },
-  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2a1214' }] },
-  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#3d1c1f' }] },
-  { featureType: 'administrative', elementType: 'labels.text.fill', stylers: [{ color: '#9CA3AF' }] },
-  { featureType: 'administrative.country', elementType: 'labels.text.fill', stylers: [{ color: '#F3F4F6' }] },
-  { featureType: 'road.local', elementType: 'labels.text.fill', stylers: [{ color: '#E5E7EB' }] },
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#231515' }] },
-];
+import { mapStyle } from '../../../shared/styles/mapStyle';
 
 type Property = {
   id: string;
@@ -154,6 +134,7 @@ export function PropertyDetailScreen({ route, navigation }: any) {
       <ScreenHeader
         title="Detalle"
         onBack={() => navigation.goBack()}
+        onEdit={() => navigation.navigate('AddProperty', { property })}
         theme="dark"
       />
 

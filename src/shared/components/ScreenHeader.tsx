@@ -10,10 +10,11 @@ interface ScreenHeaderProps {
   onBack?: () => void;
   onNotifications?: () => void;
   onHelp?: () => void;
+  onEdit?: () => void;
   theme?: 'light' | 'dark';
 }
 
-export function ScreenHeader({ title, subtitle, userName, companyName, onBack, onNotifications, onHelp, theme = 'light' }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, userName, companyName, onBack, onNotifications, onHelp, onEdit, theme = 'light' }: ScreenHeaderProps) {
   const isDark = theme === 'dark';
   const textColor = isDark ? '#FFFFFF' : '#111827';
   const subtitleColor = isDark ? '#E5E7EB' : '#6B7280';
@@ -55,6 +56,11 @@ export function ScreenHeader({ title, subtitle, userName, companyName, onBack, o
         </View>
       </View>
       <View style={styles.rightSection}>
+        {onEdit && (
+          <TouchableOpacity style={styles.iconButton} onPress={onEdit}>
+            <Ionicons name="pencil-outline" size={22} color={textColor} />
+          </TouchableOpacity>
+        )}
         {onHelp && (
           <TouchableOpacity style={styles.iconButton} onPress={onHelp}>
             <Ionicons name="help-circle-outline" size={24} color={textColor} />

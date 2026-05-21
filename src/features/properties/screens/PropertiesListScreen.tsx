@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   ActivityIndicator,
   FlatList,
@@ -85,6 +86,9 @@ export function PropertiesListScreen({ navigation }: any) {
         longitude,
         status,
         created_at,
+        id_owner,
+        id_type,
+        id_type_offer,
         type_properties (
           value,
           color
@@ -119,9 +123,11 @@ export function PropertiesListScreen({ navigation }: any) {
     setRefreshing(false);
   }, [user?.id]);
 
-  useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProperties();
+    }, [fetchProperties])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -194,7 +200,7 @@ export function PropertiesListScreen({ navigation }: any) {
             </View>
           ) : (
             <View style={styles.gridImageContainer}>
-              <Ionicons name="home-outline" size={28} color="#cc2d19" />
+              <Ionicons name="image-outline" size={38} color="#cc2d19" />
             </View>
           )}
           <View style={[styles.gridStatusPill, { backgroundColor: statusStyle.backgroundColor }]}>
@@ -762,8 +768,11 @@ const styles = StyleSheet.create({
   gridImageContainer: {
     width: 140,
     height: 140,
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12
+    backgroundColor: '#1b030367',
+    borderRadius: 12,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   gridPropertyImage: {
     width: 140,
