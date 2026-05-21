@@ -616,7 +616,7 @@ function getStatusStyle(status: string) {
   }
 
   if (normalized === 'saled') {
-    return { color: '#7C3AED', backgroundColor: '#F5F3FF' };
+    return { backgroundColor: '#6155F5' };
   }
 
   if (normalized === 'rented') {

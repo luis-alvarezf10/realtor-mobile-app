@@ -163,8 +163,7 @@ export function PropertyDetailScreen({ route, navigation }: any) {
           )}
           <View style={styles.imageBadges}>
             <View style={[styles.statusBadge, { backgroundColor: statusStyle.backgroundColor }]}>
-              <View style={[styles.statusDot, { backgroundColor: statusStyle.color }]} />
-              <Text style={[styles.statusText, { color: statusStyle.color }]}>{statusLabel}</Text>
+              <Text style={styles.statusText}>{statusLabel}</Text>
             </View>
             {!!details?.price && (
               <View style={styles.priceBadge}>
@@ -367,9 +366,9 @@ function DetailItem({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; lab
 
 function getStatusStyle(status: string) {
   const normalized = status.trim().toLowerCase();
-  if (normalized === 'available') return { color: '#047857', backgroundColor: '#ECFDF5' };
-  if (normalized === 'reserved') return { color: '#B45309', backgroundColor: '#FFFBEB' };
-  if (normalized === 'saled') return { color: '#7C3AED', backgroundColor: '#F5F3FF' };
+  if (normalized === 'available') return { backgroundColor: '#34C759' };
+  if (normalized === 'reserved') return { backgroundColor: '#FF8D28' };
+  if (normalized === 'saled') return { backgroundColor: '#6155F5' };
   if (normalized === 'rented') return { color: '#2563EB', backgroundColor: '#EFF6FF' };
   return { color: '#6B7280', backgroundColor: '#F3F4F6' };
 }
@@ -435,18 +434,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 999,
-    paddingHorizontal: 12,
+    paddingHorizontal: 18,
     paddingVertical: 6,
     gap: 6,
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
   statusText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: '700',
+    color: '#fff'
   },
   priceBadge: {
     backgroundColor: 'rgba(0,0,0,0.7)',
