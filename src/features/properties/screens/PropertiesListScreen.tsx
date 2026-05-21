@@ -249,8 +249,8 @@ export function PropertiesListScreen({ navigation }: any) {
               </View>
             )}
             {!!details?.price && (
-              <View style={styles.gridPriceBadge}>
-                <Text style={styles.gridPriceText}>
+              <View className='bg-amber-500/20 p-1 rounded'>
+                <Text className='text-amber-500 font-bold'>
                   {formatPrice(details.price, offerType?.value, details.period)}
                 </Text>
               </View>
