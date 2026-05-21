@@ -17,6 +17,7 @@ import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { supabase } from '../../../lib/supabase';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 type PropertyDetails = {
   area_sqm: number | null;
@@ -262,11 +263,7 @@ export function PropertiesListScreen({ navigation }: any) {
   };
 
   return (
-    <LinearGradient
-      colors={['#5A0001', '#000000']}
-      start={{ x: 0.9, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.container}>
+    <GradientBackground style={styles.container}>
       <ScreenHeader title="Inventario" onNotifications={() => navigation.navigate('Notifications')} theme="dark" />
       <View className='flex flex-row justify-between items-center p-4 gap-4'>
         <View className='bg-white/20 flex-1' style={styles.searchBar}>
@@ -569,7 +566,7 @@ export function PropertiesListScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
-    </LinearGradient>
+    </GradientBackground>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -29,12 +30,7 @@ export function HomeScreen({ navigation }: any) {
   }, []);
 
   return (
-    <LinearGradient
-      colors={['#5A0001', '#000000']}
-      start={{ x: 0.9, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.container}
-    >
+    <GradientBackground style={styles.container}>
       <ScreenHeader
         userName={user?.name || 'Agente'}
         companyName="Century 21"
@@ -202,7 +198,7 @@ export function HomeScreen({ navigation }: any) {
         style={styles.bottomFade}
         pointerEvents="none"
       />
-    </LinearGradient>
+    </GradientBackground>
   );
 }
 

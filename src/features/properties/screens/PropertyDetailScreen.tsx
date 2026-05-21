@@ -18,6 +18,7 @@ import * as Location from 'expo-location';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
@@ -143,10 +144,12 @@ export function PropertyDetailScreen({ route, navigation }: any) {
       };
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
       <ScreenHeader
         title="Detalle"
         onBack={() => navigation.goBack()}
+        theme="dark"
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -340,6 +343,7 @@ export function PropertyDetailScreen({ route, navigation }: any) {
         </View>
       </Modal>
     </View>
+    </GradientBackground>
   );
 }
 
@@ -403,7 +407,6 @@ function formatBathrooms(bathrooms?: number | null, halfBath?: number | null) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAF9',
   },
   imageSection: {
     position: 'relative',
@@ -411,14 +414,13 @@ const styles = StyleSheet.create({
   mainImage: {
     width: SCREEN_WIDTH,
     height: 280,
-    backgroundColor: '#F3F4F6',
   },
   imagePlaceholder: {
     width: SCREEN_WIDTH,
     height: 280,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   imageBadges: {
     position: 'absolute',
@@ -463,7 +465,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#111827',
+    color: '#fff',
     lineHeight: 28,
   },
   addressRow: {
@@ -475,24 +477,24 @@ const styles = StyleSheet.create({
   address: {
     flex: 1,
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9CA3AF',
     fontWeight: '500',
   },
   description: {
     fontSize: 14,
-    color: '#4B5563',
+    color: '#D1D5DB',
     lineHeight: 22,
     marginTop: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     marginVertical: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
     marginBottom: 12,
   },
   detailsGrid: {
@@ -504,35 +506,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   detailItemText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: '#E5E7EB',
   },
   typeBadge: {
     borderRadius: 999,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   typeText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#7F1D1D',
+    color: '#fff',
   },
   mapContainer: {
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   map: {
     width: '100%',
@@ -558,7 +562,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
     paddingTop: Platform.OS === 'ios' ? 50 : 30,
   },
   modalHeader: {
@@ -568,7 +572,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: 'rgba(255, 255, 255, 0.15)',
   },
   modalBack: {
     padding: 4,
@@ -576,7 +580,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   fullMap: {
     flex: 1,

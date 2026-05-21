@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenHeader } from "../../../shared/components/ScreenHeader";
 import { supabase } from "../../../lib/supabase";
+import { GradientBackground } from "../../../shared/components/GradientBackground";
 
 interface Message {
   id: string;
@@ -90,6 +91,7 @@ export function ChatScreen({ navigation }: any) {
   };
 
   return (
+    <GradientBackground>
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -99,6 +101,7 @@ export function ChatScreen({ navigation }: any) {
         title="Hunter AI"
         subtitle="Asistente inmobiliario inteligente"
         onBack={() => navigation.goBack()}
+        theme="dark"
       />
 
       <FlatList
@@ -170,13 +173,13 @@ export function ChatScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
   listContent: {
     padding: 16,
@@ -195,22 +198,17 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   aiBubble: {
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
     alignSelf: "flex-start",
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
   },
   aiIcon: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 8,
@@ -227,7 +225,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   aiBubbleText: {
-    color: "#111827",
+    color: "#fff",
   },
   loadingContainer: {
     flexDirection: "row",
@@ -238,18 +236,18 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
   },
   input: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
-    color: "#111827",
+    color: "#fff",
     maxHeight: 100,
   },
   sendButton: {
@@ -262,6 +260,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   sendButtonDisabled: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "rgba(255, 255, 255, 0.10)",
   },
 });

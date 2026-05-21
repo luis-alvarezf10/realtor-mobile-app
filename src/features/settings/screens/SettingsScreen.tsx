@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 type SettingsTab = 'perfil' | 'acerca' | 'ayuda';
 
@@ -67,10 +68,11 @@ export function SettingsScreen({ navigation }: any) {
   };
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configuración</Text>
         <View style={{ width: 24 }} />
@@ -91,7 +93,7 @@ export function SettingsScreen({ navigation }: any) {
               <Ionicons
                 name={activeTab === tab.key ? (tab.icon === 'person-outline' ? 'person' : tab.icon === 'information-circle-outline' ? 'information-circle' : 'help-circle') as any : tab.icon as any}
                 size={16}
-                color={activeTab === tab.key ? '#fff' : '#6B7280'}
+                color={activeTab === tab.key ? '#fff' : '#9CA3AF'}
               />
               <Text style={[
                 styles.tabLabel,
@@ -109,7 +111,7 @@ export function SettingsScreen({ navigation }: any) {
       </ScrollView>
 
       <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutDialog(true)}>
-        <Ionicons name="log-out-outline" size={20} color="#cc2d19" />
+        <Ionicons name="log-out-outline" size={20} color="#EF4444" />
         <Text style={styles.logoutText}>Cerrar sesión</Text>
       </TouchableOpacity>
 
@@ -134,13 +136,13 @@ export function SettingsScreen({ navigation }: any) {
         onCancel={() => setShowLogoutDialog(false)}
       />
     </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAF9',
   },
   header: {
     flexDirection: 'row',
@@ -149,24 +151,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   iconButton: {
     padding: 4,
   },
   tabContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   tabWrapper: {
     flexDirection: 'row',
@@ -180,16 +178,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 999,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   tabPillActive: {
     backgroundColor: '#cc2d19',
+    borderColor: '#cc2d19',
   },
   tabLabel: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6B7280',
+    color: '#9CA3AF',
   },
   tabLabelActive: {
     color: '#fff',
@@ -224,17 +225,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   email: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginTop: 4,
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#fff',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   },
   sectionText: {
     fontSize: 15,
-    color: '#4B5563',
+    color: '#D1D5DB',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -270,18 +271,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 32,
     paddingVertical: 14,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 12,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   logoutText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#cc2d19',
+    color: '#EF4444',
   },
 });

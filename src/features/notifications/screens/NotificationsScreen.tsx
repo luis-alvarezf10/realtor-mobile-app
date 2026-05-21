@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 export function NotificationsScreen({ navigation }: any) {
   const [notifications, setNotifications] = useState([
@@ -13,8 +14,9 @@ export function NotificationsScreen({ navigation }: any) {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
-      <ScreenHeader title="Notificaciones" subtitle={`${unreadCount} sin leer`} onBack={() => navigation.goBack()} />
+      <ScreenHeader title="Notificaciones" subtitle={`${unreadCount} sin leer`} onBack={() => navigation.goBack()} theme="dark" />
 
       <ScrollView contentContainerStyle={styles.listContent}>
         {notifications.map((notification) => (
@@ -46,35 +48,30 @@ export function NotificationsScreen({ navigation }: any) {
         ))}
       </ScrollView>
     </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   listContent: {
     padding: 16,
   },
   card: {
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
     borderWidth: 1,
   },
   cardRead: {
-    backgroundColor: '#fff',
-    borderColor: '#F3F4F6',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   cardUnread: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    backgroundColor: 'rgba(37, 99, 235, 0.15)',
+    borderColor: 'rgba(37, 99, 235, 0.3)',
   },
   cardContent: {
     flexDirection: 'row',
@@ -89,10 +86,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   iconAppointment: {
-    backgroundColor: '#FFEDD5',
+    backgroundColor: 'rgba(234, 88, 12, 0.15)',
   },
   iconSystem: {
-    backgroundColor: '#DBEAFE',
+    backgroundColor: 'rgba(37, 99, 235, 0.15)',
   },
   cardText: {
     flex: 1,
@@ -102,14 +99,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   titleRead: {
-    color: '#111827',
+    color: '#fff',
   },
   titleUnread: {
-    color: '#1E3A8A',
+    color: '#93C5FD',
   },
   notificationMessage: {
     fontSize: 14,
-    color: '#4B5563',
+    color: '#D1D5DB',
     marginTop: 4,
   },
   notificationDate: {
@@ -121,6 +118,6 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#2563EB',
+    backgroundColor: '#3B82F6',
   },
 });

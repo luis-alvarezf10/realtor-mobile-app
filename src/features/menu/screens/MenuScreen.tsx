@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../shared/context/AuthContext';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 export function MenuScreen({ navigation }: any) {
   const { user, loading } = useAuth();
@@ -15,11 +16,12 @@ export function MenuScreen({ navigation }: any) {
   }
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Menú</Text>
         <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Settings')}>
-          <Ionicons name="settings-outline" size={24} color="#111827" />
+          <Ionicons name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -87,13 +89,13 @@ export function MenuScreen({ navigation }: any) {
         </TouchableOpacity>
       </ScrollView>
     </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAF9',
   },
   header: {
     flexDirection: 'row',
@@ -102,14 +104,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 56,
     paddingBottom: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#fff',
   },
   iconButton: {
     padding: 4,
@@ -120,14 +120,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginTop: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 16,
     gap: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   avatar: {
     width: 60,
@@ -153,11 +150,11 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   userEmail: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginTop: 6,
   },
   userPhone: {
@@ -168,7 +165,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#686868',
+    color: '#9CA3AF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     paddingHorizontal: 18,
@@ -198,7 +195,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 28,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -206,7 +203,7 @@ const styles = StyleSheet.create({
   recordLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#111827',
+    color: '#fff',
     textAlign: 'center',
   },
 });

@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { supabase } from '../../../lib/supabase';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MONTHS = [
@@ -151,8 +152,9 @@ export function AgendaScreen({ navigation }: any) {
   };
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
-      <ScreenHeader title="Agenda" onNotifications={() => navigation.navigate('Notifications')} />
+      <ScreenHeader title="Agenda" onNotifications={() => navigation.navigate('Notifications')} theme="dark" />
 
       <View style={styles.viewAllContainer}>
         <TouchableOpacity
@@ -169,11 +171,11 @@ export function AgendaScreen({ navigation }: any) {
         <View style={styles.calendarCard}>
           <View style={styles.monthHeader}>
             <TouchableOpacity onPress={goToPrevMonth} style={styles.monthArrow}>
-              <Ionicons name="chevron-back" size={20} color="#111827" />
+              <Ionicons name="chevron-back" size={20} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.monthTitle}>{MONTHS[currentMonth]} {currentYear}</Text>
             <TouchableOpacity onPress={goToNextMonth} style={styles.monthArrow}>
-              <Ionicons name="chevron-forward" size={20} color="#111827" />
+              <Ionicons name="chevron-forward" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
 
@@ -268,13 +270,13 @@ export function AgendaScreen({ navigation }: any) {
         </View>
       </ScrollView>
     </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAF9',
   },
   scrollContent: {
     paddingBottom: 100,
@@ -288,14 +290,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: 12,
     paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   viewAllText: {
     fontSize: 15,
@@ -303,16 +302,13 @@ const styles = StyleSheet.create({
     color: '#cc2d19',
   },
   calendarCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 20,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   monthHeader: {
     flexDirection: 'row',
@@ -323,12 +319,12 @@ const styles = StyleSheet.create({
   monthArrow: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
   },
   monthTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
     textTransform: 'capitalize',
   },
   weekDaysRow: {
@@ -373,11 +369,11 @@ const styles = StyleSheet.create({
   dayInnerToday: {
     borderWidth: 2.5,
     borderColor: '#cc2d19',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(204, 45, 25, 0.15)',
   },
   dayText: {
     fontSize: 17,
-    color: '#111827',
+    color: '#fff',
     fontWeight: '500',
     zIndex: 1,
   },
@@ -410,10 +406,10 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(204, 45, 25, 0.15)',
   },
   dayTextToday: {
-    color: '#cc2d19',
+    color: '#fff',
     fontWeight: '700',
     fontSize: 18,
   },
@@ -451,7 +447,7 @@ const styles = StyleSheet.create({
   appointmentsDate: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
     textTransform: 'capitalize',
   },
   emptyState: {
@@ -472,19 +468,16 @@ const styles = StyleSheet.create({
   appointmentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     gap: 12,
   },
   appointmentTimeBadge: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -492,7 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeConfirmed: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: 'rgba(22, 163, 74, 0.15)',
   },
   appointmentTime: {
     fontSize: 13,
@@ -505,7 +498,7 @@ const styles = StyleSheet.create({
   appointmentTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   appointmentMeta: {
     flexDirection: 'row',
@@ -515,13 +508,13 @@ const styles = StyleSheet.create({
   },
   appointmentClient: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#9CA3AF',
   },
   appointmentIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },

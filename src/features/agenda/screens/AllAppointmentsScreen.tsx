@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { supabase } from '../../../lib/supabase';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
+import { GradientBackground } from '../../../shared/components/GradientBackground';
 
   type StatusFilter = 'all' | 'Realizada' | 'Pendiente' | 'Cancelada' | 'No asistí';
 
@@ -181,11 +182,13 @@ export function AllAppointmentsScreen({ navigation }: any) {
   const totalNoAsistio = appointments.filter(a => a.status === 'No asistí').length;
 
   return (
+    <GradientBackground>
     <View style={styles.container}>
       <ScreenHeader
         title="Todas las citas"
         onBack={() => navigation.goBack()}
         onHelp={showHelp}
+        theme="dark"
       />
 
       <FlatList
@@ -332,13 +335,13 @@ export function AllAppointmentsScreen({ navigation }: any) {
         </Animated.View>
       )}
     </View>
+    </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAF9',
   },
   listContent: {
     paddingBottom: 100,
@@ -361,55 +364,42 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   statCardGreen: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: 'rgba(22, 163, 74, 0.15)',
+    borderColor: 'rgba(22, 163, 74, 0.3)',
   },
   statCardYellow: {
-    backgroundColor: '#FFFBEB',
-  },
-  statCardRed: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   statValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
   },
   statValueGreen: {
-    color: '#16A34A',
+    color: '#4ADE80',
   },
   statValueYellow: {
-    color: '#F59E0B',
-  },
-  statValueRed: {
-    color: '#EF4444',
+    color: '#FBBF24',
   },
   statLabel: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   statLabelGreen: {
-    color: '#16A34A',
+    color: '#4ADE80',
   },
   statLabelYellow: {
-    color: '#F59E0B',
-  },
-  statLabelGray: {
-    color: '#6B7280',
-  },
-  statLabelRed: {
-    color: '#EF4444',
+    color: '#FBBF24',
   },
   monthStatsContainer: {
     paddingHorizontal: 16,
@@ -418,7 +408,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#686868',
+    color: '#9CA3AF',
     textTransform: 'uppercase',
     marginBottom: 8,
   },
@@ -428,30 +418,27 @@ const styles = StyleSheet.create({
   },
   monthStatCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 10,
     padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   monthStatName: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#686868',
+    color: '#D1D5DB',
     textTransform: 'capitalize',
   },
   monthStatTotal: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    color: '#fff',
     marginTop: 4,
   },
   monthStatConfirmed: {
     fontSize: 11,
-    color: '#16A34A',
+    color: '#4ADE80',
     marginTop: 2,
   },
   searchContainer: {
@@ -462,21 +449,18 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#111827',
+    color: '#fff',
   },
   filterContainer: {
     flexDirection: 'row',
@@ -488,9 +472,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   filterChipActive: {
     backgroundColor: '#cc2d19',
@@ -499,7 +483,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#6B7280',
+    color: '#D1D5DB',
   },
   filterChipTextActive: {
     color: '#fff',
@@ -507,18 +491,15 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     marginHorizontal: 16,
     marginBottom: 8,
     borderRadius: 12,
     padding: 12,
     borderLeftWidth: 4,
     gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   itemLeft: {
     alignItems: 'center',
@@ -536,7 +517,7 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: '#fff',
   },
   itemMeta: {
     flexDirection: 'row',
@@ -546,7 +527,7 @@ const styles = StyleSheet.create({
   },
   itemClient: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#9CA3AF',
   },
   itemFooter: {
     flexDirection: 'row',

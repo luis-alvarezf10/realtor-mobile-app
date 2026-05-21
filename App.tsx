@@ -1,6 +1,6 @@
 import './global.css';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -134,6 +134,38 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   );
 }
 
+function withScreenTransition<P extends object>(WrappedComponent: React.ComponentType<P>) {
+  return function AnimatedScreen(props: P) {
+    const isFocused = useIsFocused();
+    const fadeAnim = useRef(new RNAnimated.Value(0)).current;
+    const slideAnim = useRef(new RNAnimated.Value(25)).current;
+
+    useEffect(() => {
+      if (isFocused) {
+        RNAnimated.parallel([
+          RNAnimated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+          RNAnimated.timing(slideAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
+        ]).start();
+      } else {
+        fadeAnim.setValue(0);
+        slideAnim.setValue(25);
+      }
+    }, [isFocused]);
+
+    return (
+      <RNAnimated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <WrappedComponent {...props} />
+      </RNAnimated.View>
+    );
+  };
+}
+
+const HomeScreenWithTransition = withScreenTransition(HomeScreen);
+const PropertiesScreenWithTransition = withScreenTransition(PropertiesListScreen);
+const ChatScreenWithTransition = withScreenTransition(ChatScreen);
+const AgendaScreenWithTransition = withScreenTransition(AgendaScreen);
+const MenuScreenWithTransition = withScreenTransition(MenuScreen);
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -142,14 +174,23 @@ function MainTabs() {
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Properties" component={PropertiesListScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Agenda" component={AgendaScreen} />
-      <Tab.Screen name="Profile" component={MenuScreen} />
+      <Tab.Screen name="Home" component={HomeScreenWithTransition} />
+      <Tab.Screen name="Properties" component={PropertiesScreenWithTransition} />
+      <Tab.Screen name="Chat" component={ChatScreenWithTransition} />
+      <Tab.Screen name="Agenda" component={AgendaScreenWithTransition} />
+      <Tab.Screen name="Profile" component={MenuScreenWithTransition} />
     </Tab.Navigator>
   );
 }
+
+const AppDarkTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#000000',
+    card: '#000000',
+  },
+};
 
 function AppNavigator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -197,14 +238,14 @@ function AppNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
         <ActivityIndicator size="large" color="#cc2d19" />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
+      <NavigationContainer theme={AppDarkTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
         {isAuthenticated ? (
           <>
@@ -229,7 +270,7 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ backgroundColor: '#000000' }}>
       <AuthProvider>
         <AppNavigator />
       </AuthProvider>
