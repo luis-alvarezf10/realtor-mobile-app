@@ -1039,20 +1039,20 @@ export function AddPropertyScreen({ navigation, route }: any) {
       )}
 
       {avgPricePerSqm !== null && (
-        <View style={[styles.recommendInfo, { marginTop: 12 }]}>
+        <View style={[styles.averageInfo, { marginTop: 12 }]}>
           <Text style={styles.recommendLabel}>
-            Promedio para <Text style={{ color: '#fff', fontWeight: '700' }}>{selectedType?.value || ''}</Text>:
+            Promedio para <Text className='text-gray-100 font-bold'>{selectedType?.value || ''}</Text>:
           </Text>
-          <Text style={styles.recommendValue}>{Math.round(avgPricePerSqm).toLocaleString('en-US')}$/m²</Text>
+          <Text className='text-amber-500 text-2xl font-bold'>{Math.round(avgPricePerSqm).toLocaleString('en-US')} $/m²</Text>
         </View>
       )}
 
       {recommendedPrice !== null && (
-        <View style={styles.recommendInfo}>
+        <View style={styles.recommendInfo} className='bg-emerald-500/10'>
           <Text style={styles.recommendLabel}>Precio sugerido:</Text>
-          <Text style={styles.recommendPrice}>{recommendedPrice.toLocaleString('en-US')}$</Text>
-          <TouchableOpacity onPress={() => setPrice(recommendedPrice.toString())}>
-            <Text style={styles.usePriceText}>Usar este precio</Text>
+          <Text className='text-emerald-500 text-3xl font-bold'>{recommendedPrice.toLocaleString('en-US')} $</Text>
+          <TouchableOpacity onPress={() => setPrice(recommendedPrice.toString())} className='bg-emerald-500 py-2 px-5 rounded-full mt-3'>
+            <Text className='text-white font-semibold'>Usar este precio</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -1266,10 +1266,16 @@ const styles = StyleSheet.create({
   statAvg: { fontSize: 13, fontWeight: '700', color: '#D1D5DB' },
   statAvgHighlight: { color: '#cc2d19', fontSize: 14 },
   statCount: { fontSize: 11, color: '#6B7280', marginLeft: 4 },
-
+  averageInfo: {
+    backgroundColor: 'rgba(238, 180, 21, 0.1)',
+    borderRadius: 12, padding: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(156, 156, 156, 0.2)',
+  },
   recommendInfo: {
-    marginTop: 8, padding: 12, backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    marginTop: 8, padding: 12,
     borderRadius: 12, alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.2)',
   },
   recommendLabel: { fontSize: 12, color: '#9CA3AF' },
   recommendValue: { fontSize: 20, fontWeight: '800', color: '#10B981', marginTop: 4 },
