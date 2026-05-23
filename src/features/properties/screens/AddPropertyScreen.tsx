@@ -8,6 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   Image,
 } from 'react-native';
@@ -113,6 +115,12 @@ export function AddPropertyScreen({ navigation, route }: any) {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const dismissKeyboard = () => Keyboard.dismiss();
+  const doneInputProps = {
+    returnKeyType: 'done' as const,
+    blurOnSubmit: true,
+    onSubmitEditing: dismissKeyboard,
+  };
 
   useEffect(() => {
     if (!editProperty) return;
@@ -598,6 +606,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
           onChangeText={setTitle}
           placeholder="Ej: Casa en las lomas"
           placeholderTextColor="#6B7280"
+          {...doneInputProps}
         />
       </View>
 
@@ -611,6 +620,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
           placeholderTextColor="#6B7280"
           multiline
           numberOfLines={3}
+          {...doneInputProps}
         />
       </View>
 
@@ -622,6 +632,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
           onChangeText={setAddress}
           placeholder="Calle y número, colonia, ciudad..."
           placeholderTextColor="#6B7280"
+          {...doneInputProps}
         />
       </View>
 
@@ -668,6 +679,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
               placeholder="Cédula de identidad"
               placeholderTextColor="#6B7280"
               keyboardType="numeric"
+              {...doneInputProps}
             />
             <TouchableOpacity style={styles.searchButton} onPress={searchClientByCedula} disabled={searchingClient}>
               {searchingClient ? (
@@ -714,6 +726,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
                   placeholder="Cédula de identidad"
                   placeholderTextColor="#6B7280"
                   keyboardType="numeric"
+                  {...doneInputProps}
                 />
               </View>
               <View style={styles.field}>
@@ -724,6 +737,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
                   onChangeText={setNewName}
                   placeholder="Nombre del cliente"
                   placeholderTextColor="#6B7280"
+                  {...doneInputProps}
                 />
               </View>
               <View style={styles.row}>
@@ -733,8 +747,10 @@ export function AddPropertyScreen({ navigation, route }: any) {
                     style={styles.input}
                     value={newLastName}
                     onChangeText={setNewLastName}
+                    onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                     placeholder="Apellido"
                     placeholderTextColor="#6B7280"
+                    {...doneInputProps}
                   />
                 </View>
                 <View style={[styles.field, { flex: 1, marginLeft: 10 }]}>
@@ -743,9 +759,11 @@ export function AddPropertyScreen({ navigation, route }: any) {
                     style={styles.input}
                     value={newPhone}
                     onChangeText={setNewPhone}
+                    onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
                     placeholder="Teléfono"
                     placeholderTextColor="#6B7280"
                     keyboardType="phone-pad"
+                    {...doneInputProps}
                   />
                 </View>
               </View>
@@ -874,6 +892,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
         <View style={[styles.field, { flex: 1, marginLeft: 10 }]}>
@@ -885,6 +904,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
       </View>
@@ -899,6 +919,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
         <View style={[styles.field, { flex: 1, marginLeft: 10 }]}>
@@ -910,6 +931,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
       </View>
@@ -924,6 +946,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
         <View style={[styles.field, { flex: 1, marginLeft: 10 }]}>
@@ -935,6 +958,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor="#6B7280"
+            {...doneInputProps}
           />
         </View>
       </View>
@@ -992,6 +1016,7 @@ export function AddPropertyScreen({ navigation, route }: any) {
           keyboardType="numeric"
           placeholder="0"
           placeholderTextColor="#6B7280"
+          {...doneInputProps}
         />
       </View>
 
@@ -1075,52 +1100,66 @@ export function AddPropertyScreen({ navigation, route }: any) {
 
   return (
     <GradientBackground>
-      <ScreenHeader title={isEditing ? 'Editar Propiedad' : 'Nueva Propiedad'} onBack={() => navigation.goBack()} theme="dark" />
-      <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {renderStepIndicator()}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoiding}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
+      >
+        <ScreenHeader title={isEditing ? 'Editar Propiedad' : 'Nueva Propiedad'} onBack={() => navigation.goBack()} theme="dark" />
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+        >
+          {renderStepIndicator()}
 
-        {step === 0 && renderInfoStep()}
-        {step === 1 && renderClientStep()}
-        {step === 2 && renderLocationStep()}
-        {step === 3 && renderTypeStep()}
-        {step === 4 && renderDetailsStep()}
-        {step === 5 && renderPriceStep()}
+          {step === 0 && renderInfoStep()}
+          {step === 1 && renderClientStep()}
+          {step === 2 && renderLocationStep()}
+          {step === 3 && renderTypeStep()}
+          {step === 4 && renderDetailsStep()}
+          {step === 5 && renderPriceStep()}
 
-        {step < 5 ? (
-          <View style={styles.navRow}>
-            {step > 0 ? (
-              <TouchableOpacity style={styles.navButtonBack} onPress={prevStep}>
-                <Ionicons name="arrow-back" size={18} color="#D1D5DB" />
-                <Text style={styles.navButtonBackText}>Anterior</Text>
+          {step < 5 ? (
+            <View style={styles.navRow}>
+              {step > 0 ? (
+                <TouchableOpacity style={styles.navButtonBack} onPress={prevStep}>
+                  <Ionicons name="arrow-back" size={18} color="#D1D5DB" />
+                  <Text style={styles.navButtonBackText}>Anterior</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={{ flex: 1 }} />
+              )}
+              <TouchableOpacity
+                style={[styles.navButtonNext, !canGoNext() && styles.navButtonDisabled]}
+                onPress={nextStep}
+              >
+                <Text style={styles.navButtonNextText}>Siguiente</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
               </TouchableOpacity>
-            ) : (
-              <View style={{ flex: 1 }} />
-            )}
+            </View>
+          ) : (
             <TouchableOpacity
-              style={[styles.navButtonNext, !canGoNext() && styles.navButtonDisabled]}
-              onPress={nextStep}
+              style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+              onPress={handleSubmit}
+              disabled={submitting}
             >
-              <Text style={styles.navButtonNextText}>Siguiente</Text>
-              <Ionicons name="arrow-forward" size={18} color="#fff" />
+              {submitting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="checkmark-circle" size={22} color="#fff" />
+              )}
+              <Text style={styles.submitText}>{submitting ? 'Guardando...' : 'Crear Propiedad'}</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="checkmark-circle" size={22} color="#fff" />
-            )}
-            <Text style={styles.submitText}>{submitting ? 'Guardando...' : 'Crear Propiedad'}</Text>
-          </TouchableOpacity>
-        )}
+          )}
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </GradientBackground>
   );
 }
@@ -1157,8 +1196,9 @@ const summaryStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  keyboardAvoiding: { flex: 1 },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16 },
+  scrollContent: { padding: 16, paddingBottom: 140 },
 
   stepBar: {
     flexDirection: 'row',

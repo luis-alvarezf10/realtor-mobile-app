@@ -379,7 +379,10 @@ export function PropertiesListScreen({ navigation }: any) {
                   ? 'No se encontraron resultados con estos filtros de busqueda.'
                   : 'Aún no has agregado un inmueble. Crea un nuevo registro para administrar tu inventario.'}
               </Text>
-              <TouchableOpacity style={styles.emptyActionButton} onPress={clearFilters}>
+              <TouchableOpacity
+                style={styles.emptyActionButton}
+                onPress={hasActiveFilters ? clearFilters : () => navigation.navigate('AddProperty')}
+              >
                 <Text style={styles.emptyActionText}>{hasActiveFilters ? 'Limpiar Filtros' : 'Agregar Propiedad' }</Text>
               </TouchableOpacity>
             </View>

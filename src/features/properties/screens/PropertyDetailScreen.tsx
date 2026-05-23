@@ -1,6 +1,7 @@
 ﻿import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Modal,
@@ -19,6 +20,8 @@ import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 import { GradientBackground } from '../../../shared/components/GradientBackground';
+import { useAuth } from '../../../shared/context/AuthContext';
+import { supabase } from '../../../lib/supabase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
@@ -64,11 +67,13 @@ type Property = {
 
 export function PropertyDetailScreen({ route, navigation }: any) {
   const property: Property = route.params.property;
+  const { user } = useAuth();
   const mapRef = useRef<MapView>(null);
   const flyerRef = useRef<any>(null);
   const [showDirections, setShowDirections] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
@@ -98,6 +103,55 @@ export function PropertyDetailScreen({ route, navigation }: any) {
   const statusLabel = getStatusLabel(property.status);
 
   const hasLocation = property.latitude && property.longitude;
+
+  const deleteProperty = async () => {
+    if (!user?.id || deleting) return;
+
+    setDeleting(true);
+    try {
+      const { error: scheduleError } = await supabase
+        .from('schedule')
+        .update({ id_property: null })
+        .eq('id_property', property.id);
+
+      if (scheduleError) throw scheduleError;
+
+      const { error: detailsError } = await supabase
+        .from('details_properties')
+        .delete()
+        .eq('id_property', property.id);
+
+      if (detailsError) throw detailsError;
+
+      const { error: propertyError } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', property.id)
+        .eq('id_advisor', user.id);
+
+      if (propertyError) throw propertyError;
+
+      Alert.alert('Propiedad eliminada', 'La propiedad se eliminó correctamente.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (err: any) {
+      console.error('Error deleting property:', err);
+      Alert.alert('Error', err.message || 'No se pudo eliminar la propiedad.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDeleteProperty = () => {
+    Alert.alert(
+      'Eliminar propiedad',
+      `¿Seguro que deseas eliminar "${property.title}"? Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', style: 'destructive', onPress: deleteProperty },
+      ]
+    );
+  };
 
   const openDirections = async () => {
     if (!property.latitude || !property.longitude) return;
@@ -137,6 +191,8 @@ export function PropertyDetailScreen({ route, navigation }: any) {
         title="Detalle"
         onBack={() => navigation.goBack()}
         onEdit={() => navigation.navigate('AddProperty', { property })}
+        onDelete={confirmDeleteProperty}
+        deleteLoading={deleting}
         theme="dark"
       />
 

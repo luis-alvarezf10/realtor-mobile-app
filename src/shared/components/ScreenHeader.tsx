@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ScreenHeaderProps {
@@ -11,10 +11,12 @@ interface ScreenHeaderProps {
   onNotifications?: () => void;
   onHelp?: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
+  deleteLoading?: boolean;
   theme?: 'light' | 'dark';
 }
 
-export function ScreenHeader({ title, subtitle, userName, companyName, onBack, onNotifications, onHelp, onEdit, theme = 'light' }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, userName, companyName, onBack, onNotifications, onHelp, onEdit, onDelete, deleteLoading, theme = 'light' }: ScreenHeaderProps) {
   const isDark = theme === 'dark';
   const textColor = isDark ? '#FFFFFF' : '#111827';
   const subtitleColor = isDark ? '#E5E7EB' : '#6B7280';
@@ -59,6 +61,15 @@ export function ScreenHeader({ title, subtitle, userName, companyName, onBack, o
         {onEdit && (
           <TouchableOpacity style={styles.iconButton} onPress={onEdit}>
             <Ionicons name="pencil-outline" size={22} color={textColor} />
+          </TouchableOpacity>
+        )}
+        {onDelete && (
+          <TouchableOpacity style={styles.iconButton} onPress={onDelete} disabled={deleteLoading}>
+            {deleteLoading ? (
+              <ActivityIndicator size="small" color="#cc2d19" />
+            ) : (
+              <Ionicons name="trash-outline" size={22} color="#cc2d19" />
+            )}
           </TouchableOpacity>
         )}
         {onHelp && (
