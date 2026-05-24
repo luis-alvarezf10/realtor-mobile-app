@@ -47,6 +47,8 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
     { routeKey: 'Agenda', icon: 'calendar-outline', activeIcon: 'calendar', label: 'Agenda' },
     { routeKey: 'Profile', icon: 'grid-outline', activeIcon: 'grid', label: 'Menú' },
   ];
+  const activeRouteName = state.routes[state.index]?.name;
+  const showAddButton = activeRouteName !== 'Chat';
 
   const isFocused = (index: number) => state.index === index;
 
@@ -58,6 +60,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       useNativeDriver: true,
     }).start();
   }, [addMenuVisible]);
+
+  useEffect(() => {
+    if (!showAddButton && addMenuVisible) {
+      setAddMenuVisible(false);
+    }
+  }, [showAddButton, addMenuVisible]);
 
   const toggleMenu = () => {
     setAddMenuVisible(prev => !prev);
@@ -74,22 +82,24 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
   return (
     <View style={[styles.tabBarWrapper, { paddingBottom: Math.max(insets.bottom, 10) }]}>
-      <TouchableOpacity
-        style={styles.fabButton}
-        onPress={toggleMenu}
-        activeOpacity={0.85}
-      >
-        <LinearGradient
-          colors={['#ef4444', '#b91c1c']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.fabGradient}
+      {showAddButton && (
+        <TouchableOpacity
+          style={styles.fabButton}
+          onPress={toggleMenu}
+          activeOpacity={0.85}
         >
-          <RNAnimated.View style={iconRotationStyle}>
-            <Ionicons name="add" size={30} color="#fff" />
-          </RNAnimated.View>
-        </LinearGradient>
-      </TouchableOpacity>
+          <LinearGradient
+            colors={['#ef4444', '#b91c1c']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.fabGradient}
+          >
+            <RNAnimated.View style={iconRotationStyle}>
+              <Ionicons name="add" size={30} color="#fff" />
+            </RNAnimated.View>
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.floatingBar}>
         <BlurView
@@ -125,7 +135,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       </View>
 
       <AddMenu
-        visible={addMenuVisible}
+        visible={showAddButton && addMenuVisible}
         onClose={() => setAddMenuVisible(false)}
         onAddProperty={() => navigation.navigate('AddProperty')}
         onAddAppointment={() => navigation.navigate('AddAppointment')}
