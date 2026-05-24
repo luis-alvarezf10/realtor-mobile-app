@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
+  const [hideStats, setHideStats] = useState(false);
 
   const calendarDays = useMemo(() => {
     const days = [];
@@ -52,12 +53,28 @@ export function HomeScreen({ navigation }: any) {
             </Text>
           </View>
           <View className='flex flex-row gap-6 items-center'>
-            <TouchableOpacity activeOpacity={0.1}>
+            <TouchableOpacity
+              style={styles.welcomeActionButton}
+              activeOpacity={0.75}
+              onPress={() => navigation.navigate('Chat')}
+              hitSlop={10}
+              pressRetentionOffset={12}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir Hunterito"
+            >
               <Ionicons name="sparkles-outline" size={24} color="#FFF" />
             </TouchableOpacity>
             <View className='w-px h-6 bg-white/20' />
-            <TouchableOpacity activeOpacity={0.1}>
-              <Ionicons name="eye-off-outline" size={24} color="#FFF" />
+            <TouchableOpacity
+              style={styles.welcomeActionButton}
+              activeOpacity={0.75}
+              onPress={() => setHideStats(prev => !prev)}
+              hitSlop={10}
+              pressRetentionOffset={12}
+              accessibilityRole="button"
+              accessibilityLabel={hideStats ? 'Mostrar estadisticas' : 'Ocultar estadisticas'}
+            >
+              <Ionicons name={hideStats ? 'eye-outline' : 'eye-off-outline'} size={24} color="#FFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -85,7 +102,7 @@ export function HomeScreen({ navigation }: any) {
                 Total acumulado
               </Text>
             </View>
-            <Text style={styles.statValue}>500</Text>
+            <Text style={styles.statValue}>{hideStats ? '...' : '500'}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.statCardHeader}>
@@ -100,7 +117,7 @@ export function HomeScreen({ navigation }: any) {
                 Total este mes
               </Text>
             </View>
-            <Text style={styles.statValue}>5</Text>
+            <Text style={styles.statValue}>{hideStats ? '...' : '5'}</Text>
           </View>
         </View>
 
@@ -319,6 +336,13 @@ const styles = StyleSheet.create({
     borderColor: '#FF383C80',
     borderWidth: 1,
     overflow: 'hidden',
+  },
+  welcomeActionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statCardHeader: {
     flexDirection: 'row',
