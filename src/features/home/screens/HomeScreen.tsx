@@ -1,14 +1,90 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenHeader } from '../../../shared/components/ScreenHeader';
 import { GradientBackground } from '../../../shared/components/GradientBackground';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../../lib/supabase';
+
+interface HomeAppointment {
+  id: string;
+  description: string | null;
+  client_name: string | null;
+  date: string;
+  status: string | null;
+  time: string | null;
+  id_property?: string | null;
+}
+
+function todayString() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+}
+
+function toDateString(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function formatTime(time: string | null) {
+  if (!time) return 'Sin hora';
+  const [h, m] = time.split(':');
+  const hour = parseInt(h, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${m} ${ampm}`;
+}
+
+function formatAppointmentDate(dateStr: string) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (dateStr === todayString()) return 'Hoy';
+  if (dateStr === toDateString(tomorrow)) return 'Manana';
+
+  return new Date(`${dateStr}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
 
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
   const [hideStats, setHideStats] = useState(false);
+  const [appointments, setAppointments] = useState<HomeAppointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+
+  const fetchUpcomingAppointments = useCallback(async () => {
+    if (!user?.id) {
+      setAppointments([]);
+      setAppointmentsLoading(false);
+      return;
+    }
+
+    setAppointmentsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('schedule')
+        .select('id, description, client_name, date, status, time, id_property')
+        .eq('id_realtor', user.id)
+        .gte('date', todayString())
+        .order('date', { ascending: true })
+        .order('time', { ascending: true })
+        .limit(8);
+
+      if (error) throw error;
+      setAppointments((data || []) as HomeAppointment[]);
+    } catch (error) {
+      console.error('Error fetching home appointments:', error);
+      setAppointments([]);
+    } finally {
+      setAppointmentsLoading(false);
+    }
+  }, [user?.id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUpcomingAppointments();
+    }, [fetchUpcomingAppointments])
+  );
 
   const calendarDays = useMemo(() => {
     const days = [];
@@ -17,18 +93,29 @@ export function HomeScreen({ navigation }: any) {
     for (let i = 0; i < 15; i++) {
       const nextDate = new Date(today);
       nextDate.setDate(today.getDate() + i);
+      const dateStr = toDateString(nextDate);
       days.push({
         id: i.toString(),
         date: nextDate,
         dayName: dayNames[nextDate.getDay()],
         dayNumber: nextDate.getDate(),
         // Mock de algunas citas en días aleatorios
-        hasAppointment: i === 2 || i === 5 || i === 8 || i === 12,
+        hasAppointment: appointments.some(appointment => appointment.date === dateStr),
         isToday: i === 0,
       });
     }
     return days;
-  }, []);
+  }, [appointments]);
+
+  const getAppointmentIcon = (description: string | null) => {
+    if (!description) return 'calendar-outline';
+    const normalized = description.toLowerCase();
+    if (normalized.includes('visita') || normalized.includes('ver')) return 'home-outline';
+    if (normalized.includes('llamada') || normalized.includes('call')) return 'call-outline';
+    if (normalized.includes('firma') || normalized.includes('contrato')) return 'create-outline';
+    if (normalized.includes('reunion') || normalized.includes('meeting')) return 'people-outline';
+    return 'calendar-outline';
+  };
 
   return (
     <GradientBackground style={styles.container}>
@@ -418,6 +505,123 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     marginBottom: 30,
+  },
+  scheduleSection: {
+    marginBottom: 30,
+  },
+  scheduleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  scheduleLink: {
+    color: '#FF6B57',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  scheduleScroll: {
+    gap: 12,
+    paddingRight: 20,
+  },
+  scheduleLoadingCard: {
+    minHeight: 118,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  scheduleLoadingText: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  emptyScheduleCard: {
+    minHeight: 118,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#FF383C80',
+    backgroundColor: 'rgba(255, 56, 60, 0.1)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+  },
+  emptyScheduleTextWrap: {
+    flex: 1,
+  },
+  emptyScheduleTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  emptyScheduleText: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    marginTop: 3,
+  },
+  appointmentPreviewCard: {
+    width: 220,
+    minHeight: 138,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.09)',
+    padding: 12,
+  },
+  appointmentPreviewTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  appointmentDateBadge: {
+    alignItems: 'flex-end',
+  },
+  appointmentDateText: {
+    color: '#FF6B57',
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  appointmentTimeText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  appointmentPreviewTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  appointmentClientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 8,
+  },
+  appointmentClientText: {
+    flex: 1,
+    color: '#D1D5DB',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  appointmentStatus: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(245, 158, 11, 0.16)',
+    color: '#FBBF24',
+    fontSize: 11,
+    fontWeight: '900',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    textTransform: 'uppercase',
   },
   recommendationCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
