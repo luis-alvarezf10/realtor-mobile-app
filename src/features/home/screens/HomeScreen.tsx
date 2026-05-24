@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +16,13 @@ interface HomeAppointment {
   status: string | null;
   time: string | null;
   id_property?: string | null;
+  properties?: {
+    title: string | null;
+    address: string | null;
+  } | {
+    title: string | null;
+    address: string | null;
+  }[] | null;
 }
 
 function todayString() {
@@ -46,11 +53,32 @@ function formatAppointmentDate(dateStr: string) {
   return new Date(`${dateStr}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 }
 
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] || null;
+  return value || null;
+}
+
+function getAppointmentDateTime(appointment: HomeAppointment) {
+  const time = appointment.time || '23:59:59';
+  return new Date(`${appointment.date}T${time}`);
+}
+
+function formatCountdown(target: Date, now: Date) {
+  const totalSeconds = Math.max(0, Math.floor((target.getTime() - now.getTime()) / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
 export function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
   const [hideStats, setHideStats] = useState(false);
   const [appointments, setAppointments] = useState<HomeAppointment[]>([]);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+  const [now, setNow] = useState(() => new Date());
 
   const fetchUpcomingAppointments = useCallback(async () => {
     if (!user?.id) {
@@ -63,7 +91,19 @@ export function HomeScreen({ navigation }: any) {
     try {
       const { data, error } = await supabase
         .from('schedule')
-        .select('id, description, client_name, date, status, time, id_property')
+        .select(`
+          id,
+          description,
+          client_name,
+          date,
+          status,
+          time,
+          id_property,
+          properties (
+            title,
+            address
+          )
+        `)
         .eq('id_realtor', user.id)
         .gte('date', todayString())
         .order('date', { ascending: true })
@@ -86,6 +126,20 @@ export function HomeScreen({ navigation }: any) {
     }, [fetchUpcomingAppointments])
   );
 
+  useEffect(() => {
+    const intervalId = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const upcomingAppointments = useMemo(() => {
+    return appointments
+      .filter(appointment => getAppointmentDateTime(appointment).getTime() >= now.getTime())
+      .sort((a, b) => getAppointmentDateTime(a).getTime() - getAppointmentDateTime(b).getTime());
+  }, [appointments, now]);
+
+  const nextAppointment = upcomingAppointments[0] || null;
+  const nextAppointmentProperty = firstRelation(nextAppointment?.properties);
+
   const calendarDays = useMemo(() => {
     const days = [];
     const today = new Date();
@@ -99,13 +153,12 @@ export function HomeScreen({ navigation }: any) {
         date: nextDate,
         dayName: dayNames[nextDate.getDay()],
         dayNumber: nextDate.getDate(),
-        // Mock de algunas citas en días aleatorios
-        hasAppointment: appointments.some(appointment => appointment.date === dateStr),
+        hasAppointment: upcomingAppointments.some(appointment => appointment.date === dateStr),
         isToday: i === 0,
       });
     }
     return days;
-  }, [appointments]);
+  }, [upcomingAppointments]);
 
   const getAppointmentIcon = (description: string | null) => {
     if (!description) return 'calendar-outline';
@@ -230,13 +283,19 @@ export function HomeScreen({ navigation }: any) {
             />
             <Ionicons name="time-outline" size={20} color="#FFF" />
           </View>
-          <View>
-            <View className='flex flex-row gap-2 items-center'>
+          <View style={styles.nextAppointmentBody}>
+            <View style={styles.nextAppointmentTopRow}>
               <Text className="text-white text-lg">Próxima cita en</Text>
-              <Text className="text-amber-500 font-bold text-lg">5h 33m</Text>
+              <Text className="text-amber-500 font-bold text-lg">
+                {nextAppointment ? formatCountdown(getAppointmentDateTime(nextAppointment), now) : 'Sin citas'}
+              </Text>
             </View>
             <View>
-              <Text className="text-gray-300 text-sm">Visita en Calle Falsa 123 - Carlos Perez</Text>
+              <Text className="text-gray-300 text-sm" numberOfLines={2}>
+                {nextAppointment
+                  ? `${nextAppointmentProperty?.address || 'Sin direccion'} - ${nextAppointment.client_name || 'Sin cliente'}`
+                  : 'No tienes citas proximas en tu agenda.'}
+              </Text>
             </View>
           </View>
         </View>
@@ -505,6 +564,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     marginBottom: 30,
+  },
+  nextAppointmentBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  nextAppointmentTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   scheduleSection: {
     marginBottom: 30,
