@@ -73,7 +73,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
 
   return (
-    <View style={[styles.tabBarWrapper, { bottom: insets.bottom + 8 }]}>
+    <View style={[styles.tabBarWrapper, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       <TouchableOpacity
         style={styles.fabButton}
         onPress={toggleMenu}
@@ -106,13 +106,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             return (
               <TouchableOpacity
                 key={item.routeKey}
-                style={styles.tabItem}
+                style={[styles.tabItem, focused && styles.tabItemActive]}
                 onPress={() => navigation.navigate(route.name)}
                 activeOpacity={0.7}
               >
                 <Ionicons
                   name={(focused ? item.activeIcon : item.icon) as any}
-                  size={26}
+                  size={focused ? 24 : 23}
                   color={color}
                 />
                 <Text style={[styles.tabLabel, { color }]}>
@@ -285,35 +285,44 @@ export default function App() {
 const styles = StyleSheet.create({
   tabBarWrapper: {
     position: 'absolute',
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 12,
+    paddingTop: 8,
   },
   fabButton: {
     position: 'absolute',
-    right: 16,
-    bottom: 72,
+    right: 20,
+    bottom: 114,
     zIndex: 10,
     shadowColor: '#cc2d19',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.32,
+    shadowRadius: 14,
+    elevation: 10,
   },
   fabGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.20)',
   },
   floatingBar: {
     flexDirection: 'row',
-    borderRadius: 999,
+    borderRadius: 28,
     overflow: 'hidden',
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(20, 20, 22, 0.74)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.24,
+    shadowRadius: 22,
+    elevation: 12,
   },
   blurBackground: {
     position: 'absolute',
@@ -326,20 +335,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 7,
+    paddingHorizontal: 6,
     width: '100%',
+    minHeight: 64,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 2,
+    paddingVertical: 5,
+    borderRadius: 20,
+    minHeight: 50,
+  },
+  tabItemActive: {
+    backgroundColor: 'rgba(204, 45, 25, 0.10)',
   },
   tabLabel: {
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: '600',
     marginTop: 2,
   },
 });
