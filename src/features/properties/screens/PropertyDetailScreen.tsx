@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useEffect } from 'react';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import ViewShot from 'react-native-view-shot';
@@ -24,9 +25,23 @@ import { useAuth } from '../../../shared/context/AuthContext';
 import { supabase } from '../../../lib/supabase';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const POST_SIZE = 1080;
 const GOOGLE_MAPS_APIKEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_APIKEY || '';
 
 import { mapStyle } from '../../../shared/styles/mapStyle';
+
+type MarketingTemplateId = 'classic' | 'bold' | 'clean';
+
+type CompanyBrand = {
+  name: string | null;
+  logo: string | null;
+};
+
+const MARKETING_TEMPLATES: { id: MarketingTemplateId; name: string; description: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'classic', name: 'Elegante', description: 'Foto grande, precio y datos clave.', icon: 'albums-outline' },
+  { id: 'bold', name: 'Impacto', description: 'Diseño fuerte para captar atención.', icon: 'flash-outline' },
+  { id: 'clean', name: 'Minimal', description: 'Claro, directo y fácil de leer.', icon: 'scan-outline' },
+];
 
 type Property = {
   id: string;
@@ -71,9 +86,12 @@ export function PropertyDetailScreen({ route, navigation }: any) {
   const mapRef = useRef<MapView>(null);
   const flyerRef = useRef<any>(null);
   const [showDirections, setShowDirections] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<MarketingTemplateId>('classic');
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [companyBrand, setCompanyBrand] = useState<CompanyBrand | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
@@ -101,8 +119,50 @@ export function PropertyDetailScreen({ route, navigation }: any) {
 
   const statusStyle = getStatusStyle(property.status);
   const statusLabel = getStatusLabel(property.status);
+  const selectedTemplateInfo = MARKETING_TEMPLATES.find((template) => template.id === selectedTemplate) || MARKETING_TEMPLATES[0];
+  const brandName = companyBrand?.name || 'Go Hunter';
 
   const hasLocation = property.latitude && property.longitude;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCompanyBrand = async () => {
+      if (!user?.id) {
+        setCompanyBrand(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('realtors')
+          .select(`
+            companies (
+              name,
+              logo
+            )
+          `)
+          .eq('id_realtor', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        const company = firstRelation((data as any)?.companies);
+        if (isMounted) {
+          setCompanyBrand(company ? { name: company.name || null, logo: normalizeLogoUrl(company.logo) } : null);
+        }
+      } catch (err) {
+        console.error('Error fetching company brand:', err);
+        if (isMounted) setCompanyBrand(null);
+      }
+    };
+
+    fetchCompanyBrand();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   const deleteProperty = async () => {
     if (!user?.id || deleting) return;
@@ -151,6 +211,28 @@ export function PropertyDetailScreen({ route, navigation }: any) {
         { text: 'Eliminar', style: 'destructive', onPress: deleteProperty },
       ]
     );
+  };
+
+  const shareMarketingPost = async () => {
+    setSharing(true);
+    try {
+      await wait(350);
+      const uri = await flyerRef.current?.capture?.();
+      if (!uri) {
+        throw new Error('No se pudo generar el post.');
+      }
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir post publicitario' });
+      } else {
+        Alert.alert('No disponible', 'Compartir archivos no está disponible en este dispositivo.');
+      }
+    } catch (err: any) {
+      console.error('Error sharing marketing post:', err);
+      Alert.alert('Error', err.message || 'No se pudo generar el post publicitario.');
+    } finally {
+      setSharing(false);
+    }
   };
 
   const openDirections = async () => {
@@ -291,19 +373,23 @@ export function PropertyDetailScreen({ route, navigation }: any) {
 
           <>
             <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Compartir</Text>
+            <Text style={styles.sectionTitle}>Post publicitario</Text>
+            <View style={styles.templateSelectedCard}>
+              <View style={styles.templateSelectedIcon}>
+                <Ionicons name={selectedTemplateInfo.icon} size={20} color="#cc2d19" />
+              </View>
+              <View style={styles.templateSelectedText}>
+                <Text style={styles.templateSelectedName}>{selectedTemplateInfo.name}</Text>
+                <Text style={styles.templateSelectedDesc}>{selectedTemplateInfo.description}</Text>
+                <Text style={styles.templateSelectedBrand} numberOfLines={1}>{brandName}</Text>
+              </View>
+              <TouchableOpacity style={styles.templateChangeButton} onPress={() => setShowTemplateModal(true)}>
+                <Text style={styles.templateChangeText}>Cambiar</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
               style={[styles.shareButton, sharing && styles.directionsButtonDisabled]}
-              onPress={async () => {
-                setSharing(true);
-                try {
-                  const uri = await flyerRef.current?.capture?.();
-                  if (uri && await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir propiedad' });
-                  }
-                } catch {}
-                setSharing(false);
-              }}
+              onPress={shareMarketingPost}
               disabled={sharing}
             >
               {sharing ? (
@@ -311,7 +397,7 @@ export function PropertyDetailScreen({ route, navigation }: any) {
               ) : (
                 <Ionicons name="share-social" size={18} color="#fff" />
               )}
-              <Text style={styles.shareText}>{sharing ? 'Generando...' : 'Compartir propiedad'}</Text>
+              <Text style={styles.shareText}>{sharing ? 'Generando...' : 'Compartir post'}</Text>
             </TouchableOpacity>
           </>
 
@@ -426,16 +512,201 @@ export function PropertyDetailScreen({ route, navigation }: any) {
           </MapView>
         </View>
       </Modal>
+
+      <Modal visible={showTemplateModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.templateModal}>
+            <View style={styles.templateModalHeader}>
+              <Text style={styles.templateModalTitle}>Elegir diseño</Text>
+              <TouchableOpacity onPress={() => setShowTemplateModal(false)} style={styles.templateModalClose}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {MARKETING_TEMPLATES.map((template) => {
+              const isActive = selectedTemplate === template.id;
+              return (
+                <TouchableOpacity
+                  key={template.id}
+                  style={[styles.templateOption, isActive && styles.templateOptionActive]}
+                  onPress={() => {
+                    setSelectedTemplate(template.id);
+                    setShowTemplateModal(false);
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <View style={[styles.templateOptionIcon, isActive && styles.templateOptionIconActive]}>
+                    <Ionicons name={template.icon} size={22} color={isActive ? '#fff' : '#cc2d19'} />
+                  </View>
+                  <View style={styles.templateOptionBody}>
+                    <Text style={styles.templateOptionTitle}>{template.name}</Text>
+                    <Text style={styles.templateOptionDesc}>{template.description}</Text>
+                  </View>
+                  {isActive && <Ionicons name="checkmark-circle" size={22} color="#10B981" />}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
+
+      <ViewShot
+        ref={flyerRef}
+        style={styles.flyerHidden}
+        options={{ format: 'png', quality: 1, width: POST_SIZE, height: POST_SIZE }}
+      >
+        <MarketingPost
+          property={property}
+          details={details}
+          propertyType={propertyType}
+          offerType={offerType}
+          statusLabel={statusLabel}
+          template={selectedTemplate}
+          advisorName={user?.fullname || user?.name || 'Go Hunter'}
+          advisorPhone={user?.phone}
+          companyName={brandName}
+          companyLogo={companyBrand?.logo}
+        />
+      </ViewShot>
     </View>
     </GradientBackground>
   );
 }
 
-function FlyerDetail({ label, value }: { label: string; value: string }) {
+function MarketingPost({
+  property,
+  details,
+  propertyType,
+  offerType,
+  statusLabel,
+  template,
+  advisorName,
+  advisorPhone,
+  companyName,
+  companyLogo,
+}: {
+  property: Property;
+  details: Property['details_properties'] extends Array<infer U> ? U | null : any;
+  propertyType: { value: string; color: string | null } | null;
+  offerType: { name?: string; value: string } | null;
+  statusLabel: string;
+  template: MarketingTemplateId;
+  advisorName: string;
+  advisorPhone?: string | null;
+  companyName: string;
+  companyLogo?: string | null;
+}) {
+  const price = formatPrice(details?.price, offerType?.value, details?.period);
+  const specs = [
+    details?.bedrooms ? `${details.bedrooms} hab` : null,
+    details?.bathrooms ? formatBathrooms(details.bathrooms, details?.half_bath) : null,
+    details?.parking_spots ? `${details.parking_spots} est` : null,
+    details?.area_sqm ? formatArea(details.area_sqm) : null,
+  ].filter(Boolean);
+
+  if (template === 'bold') {
+    return (
+      <View style={[styles.postCanvas, styles.postBoldCanvas]}>
+        {property.image ? <Image source={{ uri: property.image }} style={styles.postBoldImage} /> : <View style={styles.postBoldImagePlaceholder} />}
+        <View style={styles.postBoldOverlay} />
+        <View style={styles.postBoldTop}>
+          <BrandMark name={companyName} logo={companyLogo} variant="dark" />
+          <Text style={styles.postStatusLight}>{statusLabel}</Text>
+        </View>
+        <View style={styles.postBoldContent}>
+          <Text style={styles.postBoldOffer}>{offerType?.name || 'Propiedad'}</Text>
+          <Text style={styles.postBoldTitle} numberOfLines={3}>{property.title}</Text>
+          <Text style={styles.postBoldPrice}>{price}</Text>
+          {!!property.address && <Text style={styles.postBoldAddress} numberOfLines={2}>{property.address}</Text>}
+        </View>
+        <View style={styles.postBoldSpecs}>
+          {specs.slice(0, 4).map((spec) => (
+            <Text key={spec} style={styles.postBoldSpec}>{spec}</Text>
+          ))}
+        </View>
+        <Text style={styles.postBoldFooter}>{advisorName}{advisorPhone ? `  |  ${advisorPhone}` : ''}</Text>
+      </View>
+    );
+  }
+
+  if (template === 'clean') {
+    return (
+      <View style={[styles.postCanvas, styles.postCleanCanvas]}>
+        <View style={styles.postCleanHeader}>
+          <BrandMark name={companyName} logo={companyLogo} variant="light" />
+          <Text style={styles.postCleanStatus}>{statusLabel}</Text>
+        </View>
+        <View style={styles.postCleanBody}>
+          <Text style={styles.postCleanType}>{propertyType?.value || offerType?.name || 'Propiedad'}</Text>
+          <Text style={styles.postCleanTitle} numberOfLines={2}>{property.title}</Text>
+          <Text style={styles.postCleanPrice}>{price}</Text>
+          {!!property.address && <Text style={styles.postCleanAddress} numberOfLines={2}>{property.address}</Text>}
+        </View>
+        {property.image ? (
+          <Image source={{ uri: property.image }} style={styles.postCleanImage} />
+        ) : (
+          <View style={styles.postCleanImagePlaceholder}>
+            <Ionicons name="home-outline" size={110} color="#cc2d19" />
+          </View>
+        )}
+        <View style={styles.postCleanSpecs}>
+          {specs.slice(0, 4).map((spec) => (
+            <Text key={spec} style={styles.postCleanSpec}>{spec}</Text>
+          ))}
+        </View>
+        <View style={styles.postCleanFooter}>
+          <Text style={styles.postCleanAdvisor}>{advisorName}</Text>
+          {!!advisorPhone && <Text style={styles.postCleanPhone}>{advisorPhone}</Text>}
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.flyerDetailItem}>
-      <Text style={styles.flyerDetailLabel}>{label}</Text>
-      <Text style={styles.flyerDetailValue}>{value}</Text>
+    <View style={[styles.postCanvas, styles.postClassicCanvas]}>
+      <View style={styles.postClassicHeader}>
+        <BrandMark name={companyName} logo={companyLogo} variant="dark" />
+        <Text style={styles.postClassicStatus}>{statusLabel}</Text>
+      </View>
+      <View style={styles.postClassicImageFrame}>
+        {property.image ? (
+          <Image source={{ uri: property.image }} style={styles.postClassicImage} />
+        ) : (
+          <View style={styles.postClassicImagePlaceholder}>
+            <Ionicons name="home-outline" size={120} color="#cc2d19" />
+          </View>
+        )}
+      </View>
+      <View style={styles.postClassicInfoCard}>
+        <View style={styles.postClassicTypeRow}>
+          <Text style={styles.postClassicType}>{propertyType?.value || 'Propiedad'}</Text>
+          {!!offerType?.name && <Text style={styles.postClassicOffer}>{offerType.name}</Text>}
+        </View>
+        <Text style={styles.postClassicTitle} numberOfLines={2}>{property.title}</Text>
+        {!!property.address && <Text style={styles.postClassicAddress} numberOfLines={2}>{property.address}</Text>}
+        <View style={styles.postClassicBottomRow}>
+          <Text style={styles.postClassicPrice}>{price}</Text>
+          <View style={styles.postClassicSpecs}>
+            {specs.slice(0, 3).map((spec) => (
+              <Text key={spec} style={styles.postClassicSpecText}>{spec}</Text>
+            ))}
+          </View>
+        </View>
+      </View>
+      <View style={styles.postClassicFooter}>
+        <Text style={styles.postClassicAdvisor}>{advisorName}</Text>
+        {!!advisorPhone && <Text style={styles.postClassicPhone}>{advisorPhone}</Text>}
+      </View>
+    </View>
+  );
+}
+
+function BrandMark({ name, logo, variant }: { name: string; logo?: string | null; variant: 'light' | 'dark' }) {
+  const textStyle = variant === 'light' ? styles.brandMarkTextLight : styles.brandMarkTextDark;
+
+  return (
+    <View style={styles.brandMark}>
+      {!!logo && <Image source={{ uri: logo }} style={styles.brandMarkLogo} resizeMode="contain" />}
+      <Text style={textStyle} numberOfLines={1}>{name}</Text>
     </View>
   );
 }
@@ -447,6 +718,28 @@ function DetailItem({ icon, label, color }: { icon: keyof typeof Ionicons.glyphM
       <Text style={[styles.detailItemText, color ? { color } : null]}>{label}</Text>
     </View>
   );
+}
+
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) {
+    return value[0] || null;
+  }
+
+  return value || null;
+}
+
+function normalizeLogoUrl(logo?: string | null) {
+  if (!logo) return null;
+
+  const cleaned = logo.replace(/\s+/g, '').trim();
+  if (!cleaned) return null;
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+
+  return supabase.storage.from('company-logos').getPublicUrl(cleaned.replace(/^\/+/, '')).data.publicUrl;
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function getStatusStyle(status: string) {
@@ -718,126 +1011,469 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
-  flyerHidden: {
-    position: 'absolute',
-    top: -10000,
-    left: 0,
-    width: SCREEN_WIDTH,
+  templateSelectedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    marginBottom: 12,
   },
-  flyer: {
-    width: SCREEN_WIDTH,
-    backgroundColor: '#fff',
-  },
-  flyerBrand: {
-    backgroundColor: '#1C2B36',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-  },
-  flyerBrandText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 4,
-  },
-  flyerImage: {
-    width: SCREEN_WIDTH,
-    height: 220,
-    backgroundColor: '#F3F4F6',
-  },
-  flyerImagePlaceholder: {
-    width: SCREEN_WIDTH,
-    height: 220,
+  templateSelectedIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(204, 45, 25, 0.16)',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FEF2F2',
   },
-  flyerBody: {
-    padding: 20,
-  },
-  flyerTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#111827',
-    lineHeight: 26,
-  },
-  flyerAddressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 8,
-  },
-  flyerAddress: {
+  templateSelectedText: {
     flex: 1,
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
   },
-  flyerPrice: {
-    fontSize: 22,
+  templateSelectedName: {
+    fontSize: 14,
     fontWeight: '800',
-    color: '#cc2d19',
-    marginTop: 12,
+    color: '#fff',
   },
-  flyerStatusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-  },
-  flyerStatusBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  flyerStatusText: {
+  templateSelectedDesc: {
     fontSize: 12,
-    fontWeight: '800',
-  },
-  flyerTypeBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  flyerTypeText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  flyerDetailsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  flyerDetailItem: {
-    width: '48%',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 10,
-    padding: 12,
-  },
-  flyerDetailLabel: {
-    fontSize: 11,
-    fontWeight: '600',
     color: '#9CA3AF',
-    textTransform: 'uppercase',
+    marginTop: 2,
   },
-  flyerDetailValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
+  templateSelectedBrand: {
+    fontSize: 12,
+    color: '#ff6b57',
+    fontWeight: '800',
     marginTop: 4,
   },
-  flyerFooter: {
-    backgroundColor: '#1C2B36',
-    paddingVertical: 12,
+  templateChangeButton: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: 'rgba(204, 45, 25, 0.16)',
+  },
+  templateChangeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#ff6b57',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.62)',
+    justifyContent: 'flex-end',
+  },
+  templateModal: {
+    backgroundColor: '#111111',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  templateModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  templateModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  templateModalClose: {
+    padding: 4,
+  },
+  templateOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    marginTop: 10,
+  },
+  templateOptionActive: {
+    borderColor: 'rgba(16, 185, 129, 0.55)',
+    backgroundColor: 'rgba(16, 185, 129, 0.10)',
+  },
+  templateOptionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(204, 45, 25, 0.14)',
+  },
+  templateOptionIconActive: {
+    backgroundColor: '#10B981',
+  },
+  templateOptionBody: {
+    flex: 1,
+  },
+  templateOptionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  templateOptionDesc: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  flyerHidden: {
+    position: 'absolute',
+    top: -2000,
+    left: 0,
+    width: POST_SIZE,
+    height: POST_SIZE,
+  },
+  postCanvas: {
+    width: POST_SIZE,
+    height: POST_SIZE,
+    overflow: 'hidden',
+  },
+  brandMark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flexShrink: 1,
+    maxWidth: 560,
+  },
+  brandMarkLogo: {
+    width: 88,
+    height: 88,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+  },
+  brandMarkTextDark: {
+    color: '#fff',
+    fontSize: 34,
+    fontWeight: '900',
+    flexShrink: 1,
+  },
+  brandMarkTextLight: {
+    color: '#111827',
+    fontSize: 32,
+    fontWeight: '900',
+    flexShrink: 1,
+  },
+  postStatusLight: {
+    color: '#fff',
+    fontSize: 26,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  postBoldCanvas: {
+    backgroundColor: '#0B0B0B',
+  },
+  postBoldImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: POST_SIZE,
+    height: POST_SIZE,
+  },
+  postBoldImagePlaceholder: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#220704',
+  },
+  postBoldOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.46)',
+  },
+  postBoldTop: {
+    position: 'absolute',
+    top: 62,
+    left: 62,
+    right: 62,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  flyerFooterText: {
-    color: '#CBD5E1',
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 2,
+  postBoldContent: {
+    position: 'absolute',
+    left: 62,
+    right: 62,
+    bottom: 245,
+  },
+  postBoldOffer: {
+    color: '#ff6b57',
+    fontSize: 34,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  postBoldTitle: {
+    color: '#fff',
+    fontSize: 76,
+    fontWeight: '900',
+    lineHeight: 84,
+    marginTop: 16,
+  },
+  postBoldPrice: {
+    color: '#fff',
+    fontSize: 58,
+    fontWeight: '900',
+    marginTop: 24,
+  },
+  postBoldAddress: {
+    color: '#E5E7EB',
+    fontSize: 28,
+    lineHeight: 36,
+    marginTop: 16,
+  },
+  postBoldSpecs: {
+    position: 'absolute',
+    left: 62,
+    right: 62,
+    bottom: 130,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+  },
+  postBoldSpec: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: '800',
+    backgroundColor: 'rgba(204, 45, 25, 0.86)',
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  postBoldFooter: {
+    position: 'absolute',
+    left: 62,
+    right: 62,
+    bottom: 58,
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: '700',
+  },
+  postCleanCanvas: {
+    backgroundColor: '#FFFFFF',
+  },
+  postCleanHeader: {
+    height: 132,
+    paddingHorizontal: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  postCleanStatus: {
+    color: '#111827',
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    borderWidth: 2,
+    borderColor: '#111827',
+    borderRadius: 999,
+    paddingHorizontal: 22,
+    paddingVertical: 8,
+  },
+  postCleanImage: {
+    width: 952,
+    height: 430,
+    marginHorizontal: 64,
+    borderRadius: 28,
+  },
+  postCleanImagePlaceholder: {
+    width: 952,
+    height: 430,
+    marginHorizontal: 64,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  postCleanBody: {
+    paddingHorizontal: 64,
+    paddingTop: 22,
+    paddingBottom: 28,
+  },
+  postCleanType: {
+    color: '#cc2d19',
+    fontSize: 23,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  postCleanTitle: {
+    color: '#111827',
+    fontSize: 60,
+    fontWeight: '900',
+    lineHeight: 66,
+    marginTop: 10,
+  },
+  postCleanPrice: {
+    color: '#111827',
+    fontSize: 48,
+    fontWeight: '900',
+    marginTop: 18,
+  },
+  postCleanAddress: {
+    color: '#4B5563',
+    fontSize: 25,
+    lineHeight: 34,
+    marginTop: 12,
+  },
+  postCleanSpecs: {
+    position: 'absolute',
+    left: 64,
+    right: 64,
+    bottom: 118,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: '#E5E7EB',
+    paddingVertical: 18,
+  },
+  postCleanSpec: {
+    color: '#111827',
+    fontSize: 25,
+    fontWeight: '900',
+  },
+  postCleanFooter: {
+    position: 'absolute',
+    left: 64,
+    right: 64,
+    bottom: 42,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  postCleanAdvisor: {
+    color: '#111827',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  postCleanPhone: {
+    color: '#6B7280',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  postClassicCanvas: {
+    backgroundColor: '#0B0F14',
+  },
+  postClassicHeader: {
+    height: 142,
+    paddingHorizontal: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  postClassicStatus: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    backgroundColor: 'rgba(204, 45, 25, 0.92)',
+    borderRadius: 999,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  postClassicImageFrame: {
+    width: 968,
+    height: 560,
+    marginHorizontal: 56,
+    borderRadius: 34,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  postClassicImage: {
+    width: '100%',
+    height: '100%',
+  },
+  postClassicImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  postClassicInfoCard: {
+    marginHorizontal: 56,
+    marginTop: -58,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    padding: 38,
+    borderWidth: 1,
+    borderColor: 'rgba(17, 24, 39, 0.08)',
+  },
+  postClassicTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  postClassicType: {
+    color: '#cc2d19',
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  postClassicOffer: {
+    color: '#6B7280',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  postClassicTitle: {
+    color: '#111827',
+    fontSize: 52,
+    fontWeight: '900',
+    lineHeight: 58,
+    marginTop: 14,
+  },
+  postClassicAddress: {
+    color: '#4B5563',
+    fontSize: 23,
+    lineHeight: 30,
+    marginTop: 12,
+  },
+  postClassicBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 24,
+    marginTop: 22,
+  },
+  postClassicPrice: {
+    color: '#cc2d19',
+    fontSize: 46,
+    fontWeight: '900',
+    flex: 1,
+  },
+  postClassicSpecs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    gap: 14,
+    flex: 1,
+  },
+  postClassicSpecText: {
+    color: '#111827',
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  postClassicFooter: {
+    position: 'absolute',
+    left: 56,
+    right: 56,
+    bottom: 38,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  postClassicAdvisor: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  postClassicPhone: {
+    color: '#D1D5DB',
+    fontSize: 24,
+    fontWeight: '700',
   },
 });
